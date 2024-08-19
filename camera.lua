@@ -1,26 +1,19 @@
+--- @class Camera
+--- @field [any] any
 local Camera = {}
+Camera.__index = Camera
 
-function Camera:new(target)
-	if not target.getPosition then
-		error("Invalid camera target. Target must have a getPosition() method.")
-	end
-
-	local camera = {}
-	setmetatable(camera, self)
-	self.__index = self
-
-	camera.target = target
-	self.transform = love.math.newTransform()
-
-	return camera
+function Camera:new()
+	local instance = setmetatable({}, self)
+	instance.transform = love.math.newTransform()
+	return instance
 end
 
 function Camera:screenToWorld(x, y)
 	return self.transform:inverseTransformPoint(x, y)
 end
 
-function Camera:update(dt)
-	local posX, posY = self.target:getPosition()
+function Camera:update(posX, posY)
 	self:setCenter(posX, posY)
 end
 
