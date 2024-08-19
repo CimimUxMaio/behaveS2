@@ -2,7 +2,7 @@ local utils = require("base.utils.math")
 
 --- @class Game
 --- @field private entities {[string]: Entity}
---- @field private subscriptions {[string]: Behaviour[]}
+--- @field private subscriptions {[string]: {[string]: Behaviour[]}}
 local Game = {}
 Game.__index = Game
 
@@ -23,41 +23,15 @@ function Game:spawn(entity)
 	entity:_setGame(self)
 
 	self.entities[id] = entity
-	self:subscribeBehaviours(entity)
+
+	for _, behaviour in pairs(entity:getBehaviours()) do
+		self:subscribe(behaviour)
+	end
 
 	self:raiseEvent(entity, "spawn")
 
 	for _, child in ipairs(entity:getChildren()) do
 		self:spawn(child)
-	end
-end
-
---- @private
---- @param entity Entity
-function Game:subscribeBehaviours(entity)
-	for _, behaviour in pairs(entity:getBehaviours()) do
-		self:subscribe(entity, behaviour)
-	end
-end
-
---- @private
---- @param entity Entity
---- @param behaviour Behaviour
-function Game:subscribe(entity, behaviour)
-	for key, value in pairs(behaviour:getClass()) do
-		if type(value) ~= "function" then
-			goto continue
-		end
-
-		local event, match = string.gsub(key, "^on(%u%l+)", "%1")
-		if match > 0 then
-			event = string.gsub(event, "^%u", string.lower)
-			self.subscriptions[event] = self.subscriptions[event] or {}
-			self.subscriptions[event][entity:getId()] = behaviour
-			table.insert(self.subscriptions[event], behaviour)
-		end
-
-		::continue::
 	end
 end
 
@@ -67,10 +41,13 @@ function Game:destroy(entity)
 		entity = self.entities[entity]
 	end
 
-	entity:_markDestroyed()
 	self:raiseEvent(entity, "destroy")
 
 	self.entities[entity:getId()] = nil
+
+	for _, behaviour in pairs(entity:getBehaviours()) do
+		self:unsubscribe(behaviour)
+	end
 
 	local parent = entity:getParent()
 	if parent ~= nil then
@@ -79,6 +56,39 @@ function Game:destroy(entity)
 
 	for _, child in ipairs(entity:getChildren()) do
 		self:destroy(child)
+	end
+end
+
+--- @private
+--- @param behaviour Behaviour
+function Game:subscribe(behaviour)
+	local events = behaviour:handledEvents()
+	local entityId = behaviour:getEntity():getId()
+
+	for _, event in ipairs(events) do
+		self.subscriptions[event] = self.subscriptions[event] or {}
+		self.subscriptions[event][entityId] = self.subscriptions[event][entityId] or {}
+		table.insert(self.subscriptions[event][entityId], behaviour)
+	end
+end
+
+--- @private
+--- @param behaviour Behaviour
+function Game:unsubscribe(behaviour)
+	local events = behaviour:handledEvents()
+	local entityId = behaviour:getEntity():getId()
+
+	for _, event in ipairs(events) do
+		self.subscriptions[event] = self.subscriptions[event] or {}
+		self.subscriptions[event][entityId] = self.subscriptions[event][entityId] or {}
+		local eventSubs = self.subscriptions[event][entityId]
+
+		for i, sub in ipairs(eventSubs) do
+			if sub == behaviour then
+				table.remove(eventSubs, i)
+				break
+			end
+		end
 	end
 end
 
@@ -92,24 +102,22 @@ function Game:draw()
 end
 
 --- @param event string
---- @param target Entity | Entity[] | nil
+--- @param target Entity | nil
 --- @param ... any
 function Game:raiseEvent(target, event, ...)
-	if target ~= nil and #target == 0 then -- Entity
-		target = { target }
-	end
-
 	local subscribers = self.subscriptions[event] or {}
-	for _, behaviour in pairs(subscribers) do
-		if target == nil then
-			behaviour:handleEvent(event, ...)
-		else
-			for _, entity in ipairs(target) do
-				if behaviour:getEntity() == entity then
-					behaviour:handleEvent(event, ...)
-					break
-				end
+	if target == nil then
+		-- Subscribers from all entities
+		for _, behaviours in pairs(subscribers) do
+			for _, behaviour in ipairs(behaviours) do
+				behaviour:handleEvent(event, ...)
 			end
+		end
+	else
+		-- Subscribers from target entity
+		local targetSubscribers = subscribers[target:getId()] or {}
+		for _, behaviour in ipairs(targetSubscribers) do
+			behaviour:handleEvent(event, ...)
 		end
 	end
 end

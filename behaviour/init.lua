@@ -44,4 +44,19 @@ function Behaviour:handleEvent(event, ...)
 	end
 end
 
+--- @return string[]
+function Behaviour:handledEvents()
+	local events = {}
+
+	for key, value in pairs(self:getClass()) do
+		local event, match = string.gsub(key, "^on(%u%l+)", "%1")
+		if match > 0 and type(value) == "function" then
+			event = string.gsub(event, "^%u", string.lower)
+			table.insert(events, event)
+		end
+	end
+
+	return events
+end
+
 return Behaviour

@@ -4,7 +4,6 @@
 --- @field private behaviours Behaviour[]
 --- @field private parent? Entity
 --- @field private children Entity[]
---- @field private destroyed boolean
 local Entity = {}
 Entity.__index = Entity
 
@@ -14,7 +13,6 @@ function Entity:new()
 	instance.behaviours = {}
 	instance.parent = nil
 	instance.children = {}
-	instance.destroyed = false
 	return instance
 end
 
@@ -36,10 +34,6 @@ end
 --- @param parent? Entity
 function Entity:_setParent(parent)
 	self.parent = parent
-end
-
-function Entity:_markDestroyed()
-	self.destroyed = true
 end
 
 --- @return Entity?
