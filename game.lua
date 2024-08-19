@@ -25,7 +25,7 @@ function Game:spawn(entity)
 	self.entities[id] = entity
 
 	for _, behaviour in pairs(entity:getBehaviours()) do
-		self:subscribe(behaviour)
+		self:_subscribe(behaviour)
 	end
 
 	self:raiseEvent(entity, "spawn")
@@ -46,7 +46,7 @@ function Game:destroy(entity)
 	self.entities[entity:getId()] = nil
 
 	for _, behaviour in pairs(entity:getBehaviours()) do
-		self:unsubscribe(behaviour)
+		self:_unsubscribe(behaviour)
 	end
 
 	local parent = entity:getParent()
@@ -59,9 +59,8 @@ function Game:destroy(entity)
 	end
 end
 
---- @private
 --- @param behaviour Behaviour
-function Game:subscribe(behaviour)
+function Game:_subscribe(behaviour)
 	local events = behaviour:handledEvents()
 	local entityId = behaviour:getEntity():getId()
 
@@ -72,9 +71,8 @@ function Game:subscribe(behaviour)
 	end
 end
 
---- @private
 --- @param behaviour Behaviour
-function Game:unsubscribe(behaviour)
+function Game:_unsubscribe(behaviour)
 	local events = behaviour:handledEvents()
 	local entityId = behaviour:getEntity():getId()
 

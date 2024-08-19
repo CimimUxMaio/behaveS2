@@ -46,12 +46,22 @@ end
 function Entity:addBehaviour(behaviour)
 	self.behaviours[behaviour:getClass()] = behaviour
 	behaviour:_setEntity(self)
+
+	if self.game then -- Already spawned
+		self.game:_subscribe(behaviour)
+	end
+
 	return self
 end
 
 --- @param class Behaviour
 function Entity:removeBehaviour(class)
+	local behaviour = self.behaviours[class]
 	self.behaviours[class] = nil
+
+	if self.game and behaviour ~= nil then -- Already spawned
+		self.game:_unsubscribe(behaviour)
+	end
 end
 
 --- @generic T : Behaviour
