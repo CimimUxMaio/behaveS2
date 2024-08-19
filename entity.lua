@@ -1,8 +1,10 @@
 --- @class Entity
 --- @field private id string
---- @field protected behaviours Behaviour[]
---- @field protected parent? Entity
---- @field protected children Entity[]
+--- @field private game Game
+--- @field private behaviours Behaviour[]
+--- @field private parent? Entity
+--- @field private children Entity[]
+--- @field private destroyed boolean
 local Entity = {}
 Entity.__index = Entity
 
@@ -12,12 +14,18 @@ function Entity:new()
 	instance.behaviours = {}
 	instance.parent = nil
 	instance.children = {}
+	instance.destroyed = false
 	return instance
 end
 
 --- @param id string
 function Entity:_setId(id)
 	self.id = id
+end
+
+--- @parm game Game
+function Entity:_setGame(game)
+	self.game = game
 end
 
 --- @return string
@@ -28,6 +36,10 @@ end
 --- @param parent? Entity
 function Entity:_setParent(parent)
 	self.parent = parent
+end
+
+function Entity:_markDestroyed()
+	self.destroyed = true
 end
 
 --- @return Entity?
@@ -84,12 +96,8 @@ function Entity:getChildren()
 	return self.children
 end
 
---- @param event string
---- @param ... any
-function Entity:handleEvent(event, ...)
-	for _, behaviour in pairs(self.behaviours) do
-		behaviour:handleEvent(event, ...)
-	end
+function Entity:raiseEvent(event, ...)
+	self.game:raiseEvent(self, event, ...)
 end
 
 function Entity:_checkRequirements()

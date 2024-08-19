@@ -45,14 +45,14 @@ end
 --- @param other love.Fixture
 --- @param contact love.Contact
 function PhysicsBody:collisionEnter(fixture, other, contact)
-	self.entity:handleEvent("collisionEnter", fixture, other, contact)
+	self.entity:raiseEvent("collisionEnter", fixture, other, contact)
 end
 
 --- @param fixture love.Fixture
 --- @param other love.Fixture
 --- @param contact love.Contact
 function PhysicsBody:collisionExit(fixture, other, contact)
-	self.entity:handleEvent("collisionExit", fixture, other, contact)
+	self.entity:raiseEvent("collisionExit", fixture, other, contact)
 end
 
 --- @param world love.World

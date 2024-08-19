@@ -24,6 +24,11 @@ function Behaviour:getRequirements()
 	return self.requirements
 end
 
+--- @return Entity
+function Behaviour:getEntity()
+	return self.entity
+end
+
 --- @param entity Entity
 function Behaviour:_setEntity(entity)
 	self.entity = entity
