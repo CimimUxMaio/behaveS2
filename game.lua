@@ -59,14 +59,16 @@ end
 
 --- @param dt number
 function Game:update(dt)
-	for _, entity in pairs(self.entities) do
-		entity:handleEvent("update", dt)
-	end
+	self:broadcastEvent("update", dt)
 end
 
 function Game:draw()
+	self:broadcastEvent("draw")
+end
+
+function Game:broadcastEvent(event, ...)
 	for _, entity in pairs(self.entities) do
-		entity:handleEvent("draw")
+		entity:handleEvent(event, ...)
 	end
 end
 
