@@ -104,10 +104,13 @@ function Entity:getChildren()
 	return self.children
 end
 
+--- @param event string
+--- @param ... any
 function Entity:raiseEvent(event, ...)
 	self.game:raiseEvent(self, event, ...)
 end
 
+--- @return boolean
 function Entity:isSpawned()
 	return self.game ~= nil
 end
