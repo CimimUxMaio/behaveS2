@@ -47,7 +47,7 @@ function Entity:addBehaviour(behaviour)
 	self.behaviours[behaviour:getClass()] = behaviour
 	behaviour:_setEntity(self)
 
-	if self.game then -- Already spawned
+	if self:isSpawned() then
 		self.game:_subscribe(behaviour)
 	end
 
@@ -59,7 +59,7 @@ function Entity:removeBehaviour(class)
 	local behaviour = self.behaviours[class]
 	self.behaviours[class] = nil
 
-	if self.game and behaviour ~= nil then -- Already spawned
+	if self:isSpawned() and behaviour ~= nil then
 		self.game:_unsubscribe(behaviour)
 	end
 end
@@ -80,19 +80,23 @@ end
 function Entity:addChild(child)
 	table.insert(self.children, child)
 	child._setParent(self)
+
+	if self:isSpawned() and not child:isSpawned() then
+		self.game:spawn(child)
+	end
+
 	return self
 end
 
 --- @param child Entity
 function Entity:removeChild(child)
-	local pos = 1
-	repeat
-		local c = self.children[pos]
-		pos = pos + 1
-	until c ~= child
-
-	table.remove(self.children, pos)
-	child:_setParent(nil)
+	for i, c in ipairs(self.children) do
+		if c == child then
+			table.remove(self.children, i)
+			child:_setParent(nil)
+			return
+		end
+	end
 end
 
 --- @return Entity[]
@@ -102,6 +106,10 @@ end
 
 function Entity:raiseEvent(event, ...)
 	self.game:raiseEvent(self, event, ...)
+end
+
+function Entity:isSpawned()
+	return self.game ~= nil
 end
 
 function Entity:_checkRequirements()
