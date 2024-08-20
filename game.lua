@@ -28,7 +28,7 @@ function Game:spawn(entity)
 		self:_subscribe(behaviour)
 	end
 
-	self:raiseEvent(entity, "spawn")
+	self:targetEvent(entity, "spawn")
 
 	for _, child in ipairs(entity:getChildren()) do
 		self:spawn(child)
@@ -41,7 +41,7 @@ function Game:destroy(entity)
 		entity = self.entities[entity]
 	end
 
-	self:raiseEvent(entity, "destroy")
+	self:targetEvent(entity, "destroy")
 
 	self.entities[entity:getId()] = nil
 
@@ -92,46 +92,65 @@ end
 
 --- @param dt number
 function Game:update(dt)
-	self:raiseEvent(nil, "update", dt)
+	self:broadcastEvent("update", dt)
 end
 
 function Game:draw()
-	local subscribers = self.subscriptions["draw"] or {}
-	local drawables = {}
-	for _, behaviours in pairs(subscribers) do
-		for _, behaviour in ipairs(behaviours) do
-			table.insert(drawables, behaviour)
+	self:raiseEvent("draw", function(subscribers)
+		local all = {}
+		for _, behaviours in pairs(subscribers) do
+			for _, behaviour in ipairs(behaviours) do
+				table.insert(all, behaviour)
+			end
 		end
-	end
 
-	table.sort(drawables, function(a, b)
-		return a:getDrawOrder() < b:getDrawOrder()
+		table.sort(all, function(a, b)
+			local orderA, orderB = a:getDrawOrder(), b:getDrawOrder()
+			local layerA, layerB = a:getDrawLayer(), b:getDrawLayer()
+			return orderA > orderB or (orderA == orderB and layerA > layerB)
+		end)
+
+		return all
 	end)
+end
 
-	for _, behaviour in ipairs(drawables) do
-		behaviour:handleEvent("draw")
+--- @private
+--- @param event string
+--- @param filter fun(subscribers:{[string]: Behaviour[]}): Behaviour[]
+--- @param ... any
+function Game:raiseEvent(event, filter, ...)
+	local subscribers = self.subscriptions[event] or {}
+	for _, behaviour in ipairs(filter(subscribers)) do
+		behaviour:handleEvent(event, ...)
 	end
 end
 
 --- @param event string
---- @param target Entity | nil
 --- @param ... any
-function Game:raiseEvent(target, event, ...)
-	local subscribers = self.subscriptions[event] or {}
-	if target == nil then
-		-- Subscribers from all entities
+function Game:broadcastEvent(event, ...)
+	self:raiseEvent(event, function(subscribers)
+		local all = {}
 		for _, behaviours in pairs(subscribers) do
 			for _, behaviour in ipairs(behaviours) do
-				behaviour:handleEvent(event, ...)
+				table.insert(all, behaviour)
 			end
 		end
-	else
-		-- Subscribers from target entity
-		local targetSubscribers = subscribers[target:getId()] or {}
-		for _, behaviour in ipairs(targetSubscribers) do
-			behaviour:handleEvent(event, ...)
-		end
+
+		return all
+	end, ...)
+end
+
+--- @param entity Entity | string
+--- @param event string
+--- @param ... any
+function Game:targetEvent(entity, event, ...)
+	if type(entity) == "table" then
+		entity = entity:getId()
 	end
+
+	self:raiseEvent(event, function(subscribers)
+		return subscribers[entity] or {}
+	end, ...)
 end
 
 return Game
