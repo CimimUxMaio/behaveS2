@@ -1,7 +1,6 @@
 local Behaviour = require("base.behaviour")
 
 --- @class PhysicsBody : Behaviour
---- @field protected body love.Body
 --- @field protected shape love.Shape
 --- @field protected fixture love.Fixture
 local PhysicsBody = setmetatable({}, Behaviour)
@@ -21,7 +20,7 @@ function PhysicsBody:new(fixture)
 end
 
 function PhysicsBody:onDestroy()
-	self.fixture:destroy()
+	self.fixture:getBody():destroy()
 end
 
 --- @return love.Fixture

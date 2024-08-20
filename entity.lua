@@ -4,6 +4,7 @@
 --- @field private behaviours Behaviour[]
 --- @field private parent? Entity
 --- @field private children Entity[]
+--- @field private destroyed boolean
 local Entity = {}
 Entity.__index = Entity
 
@@ -13,6 +14,7 @@ function Entity:new()
 	instance.behaviours = {}
 	instance.parent = nil
 	instance.children = {}
+	instance.destroyed = false
 	return instance
 end
 
@@ -24,6 +26,15 @@ end
 --- @parm game Game
 function Entity:_setGame(game)
 	self.game = game
+end
+
+function Entity:_setDestroyed()
+	self.destroyed = true
+end
+
+--- @return boolean
+function Entity:isDestroyed()
+	return self.destroyed
 end
 
 --- @return string
@@ -71,6 +82,13 @@ function Entity:getBehaviour(class)
 	return self.behaviours[class]
 end
 
+--- @generic T : Behaviour
+--- @param class T
+--- @return boolean
+function Entity:hasBehaviour(class)
+	return self:getBehaviour(class) ~= nil
+end
+
 --- @return Behaviour[]
 function Entity:getBehaviours()
 	return self.behaviours
@@ -112,15 +130,14 @@ end
 
 --- @return boolean
 function Entity:isSpawned()
-	return self.game ~= nil
+	return self.game ~= nil and not self:isDestroyed()
 end
 
 function Entity:_checkRequirements()
 	for _, behaviour in pairs(self.behaviours) do
 		local requirements = behaviour:getRequirements()
 		for _, requirement in ipairs(requirements) do
-			local component = self:getBehaviour(requirement:getClass())
-			if component == nil then
+			if not self:hasBehaviour(requirement:getClass()) then
 				error(
 					string.format(
 						"Entity is missing a behaviour of class: %s, required by the behaviour: %s",

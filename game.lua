@@ -3,6 +3,7 @@ local utils = require("base.utils.math")
 --- @class Game
 --- @field private entities {[string]: Entity}
 --- @field private subscriptions {[string]: {[string]: Behaviour[]}}
+--- @field private destroyed {[string]: boolean}
 local Game = {}
 Game.__index = Game
 
@@ -11,6 +12,7 @@ function Game:new()
 	local instance = setmetatable({}, self)
 	instance.entities = {}
 	instance.subscriptions = {}
+	instance.destroyed = {}
 	return instance
 end
 
@@ -44,6 +46,7 @@ function Game:destroy(entity)
 	self:_targetEvent(entity, "destroy")
 
 	self.entities[entity:getId()] = nil
+	entity:_setDestroyed()
 
 	for _, behaviour in pairs(entity:getBehaviours()) do
 		self:_unsubscribe(behaviour)
@@ -121,7 +124,9 @@ end
 function Game:raiseEvent(event, filter, ...)
 	local subscribers = self.subscriptions[event] or {}
 	for _, behaviour in ipairs(filter(subscribers)) do
-		behaviour:handleEvent(event, ...)
+		if not behaviour:getEntity():isDestroyed() then
+			behaviour:handleEvent(event, ...)
+		end
 	end
 end
 
