@@ -107,7 +107,7 @@ end
 --- @param event string
 --- @param ... any
 function Entity:raiseEvent(event, ...)
-	self.game:targetEvent(self, event, ...)
+	self.game:_targetEvent(self, event, ...)
 end
 
 --- @return boolean

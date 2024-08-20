@@ -28,7 +28,7 @@ function Game:spawn(entity)
 		self:_subscribe(behaviour)
 	end
 
-	self:targetEvent(entity, "spawn")
+	self:_targetEvent(entity, "spawn")
 
 	for _, child in ipairs(entity:getChildren()) do
 		self:spawn(child)
@@ -41,7 +41,7 @@ function Game:destroy(entity)
 		entity = self.entities[entity]
 	end
 
-	self:targetEvent(entity, "destroy")
+	self:_targetEvent(entity, "destroy")
 
 	self.entities[entity:getId()] = nil
 
@@ -143,7 +143,7 @@ end
 --- @param entity Entity | string
 --- @param event string
 --- @param ... any
-function Game:targetEvent(entity, event, ...)
+function Game:_targetEvent(entity, event, ...)
 	if type(entity) == "table" then
 		entity = entity:getId()
 	end
