@@ -1,6 +1,7 @@
 --- @class Behaviour
 --- @field protected requirements Behaviour[]
 --- @field protected entity Entity
+--- @field private drawOrder number
 local Behaviour = {}
 Behaviour.__index = Behaviour
 Behaviour.className = "<Unnamed Behaviour>"
@@ -11,6 +12,7 @@ Behaviour.className = "<Unnamed Behaviour>"
 function Behaviour:new(requirements)
 	local instance = setmetatable({}, self)
 	instance.requirements = requirements or {}
+	instance.drawOrder = math.huge
 	return instance
 end
 
@@ -22,6 +24,16 @@ end
 --- @return Behaviour[]
 function Behaviour:getRequirements()
 	return self.requirements
+end
+
+--- @return number
+function Behaviour:getDrawOrder()
+	return self.drawOrder
+end
+
+--- @param drawOrder number
+function Behaviour:setDrawOrder(drawOrder)
+	self.drawOrder = drawOrder
 end
 
 --- @return Entity

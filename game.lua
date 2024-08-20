@@ -96,7 +96,21 @@ function Game:update(dt)
 end
 
 function Game:draw()
-	self:raiseEvent(nil, "draw")
+	local subscribers = self.subscriptions["draw"] or {}
+	local drawables = {}
+	for _, behaviours in pairs(subscribers) do
+		for _, behaviour in ipairs(behaviours) do
+			table.insert(drawables, behaviour)
+		end
+	end
+
+	table.sort(drawables, function(a, b)
+		return a:getDrawOrder() < b:getDrawOrder()
+	end)
+
+	for _, behaviour in ipairs(drawables) do
+		behaviour:handleEvent("draw")
+	end
 end
 
 --- @param event string
