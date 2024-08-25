@@ -129,7 +129,9 @@ end
 --- @param event string
 --- @param ... any
 function Entity:raiseEvent(event, ...)
-	self.game:_targetEvent(self, event, ...)
+	for _, behaviour in pairs(self.behaviours) do
+		behaviour:handleEvent(event, ...)
+	end
 end
 
 --- @return boolean
