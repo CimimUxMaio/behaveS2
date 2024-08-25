@@ -72,6 +72,8 @@ function Game:_subscribe(behaviour)
 		self.subscriptions[event][entityId] = self.subscriptions[event][entityId] or {}
 		table.insert(self.subscriptions[event][entityId], behaviour)
 	end
+
+	behaviour:handleEvent("ready")
 end
 
 --- @param behaviour Behaviour
@@ -91,6 +93,8 @@ function Game:_unsubscribe(behaviour)
 			end
 		end
 	end
+
+	behaviour:handleEvent("remove")
 end
 
 --- @param dt number
