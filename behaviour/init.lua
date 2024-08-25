@@ -28,6 +28,20 @@ function Behaviour:getRequirements()
 	return self.requirements
 end
 
+function Behaviour:_checkRequirements()
+	for _, requirement in ipairs(self.requirements) do
+		if not self.entity:hasBehaviour(requirement) then
+			error(
+				string.format(
+					"Entity is missing a behaviour of class: %s, required by the behaviour: %s",
+					requirement.className,
+					self:getClass().className
+				)
+			)
+		end
+	end
+end
+
 --- @return number
 function Behaviour:getDrawOrder()
 	return self.drawOrder

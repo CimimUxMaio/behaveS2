@@ -18,8 +18,6 @@ end
 
 --- @param entity Entity
 function Game:spawn(entity)
-	entity:_checkRequirements()
-
 	local id = utils.uuid()
 	entity:_setId(id)
 	entity:_setGame(self)
@@ -64,6 +62,8 @@ end
 
 --- @param behaviour Behaviour
 function Game:_subscribe(behaviour)
+	behaviour:_checkRequirements()
+
 	local events = behaviour:handledEvents()
 	local entityId = behaviour:getEntity():getId()
 

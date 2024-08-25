@@ -139,23 +139,6 @@ function Entity:isSpawned()
 	return self.game ~= nil and not self:isDestroyed()
 end
 
-function Entity:_checkRequirements()
-	for _, behaviour in pairs(self.behaviours) do
-		local requirements = behaviour:getRequirements()
-		for _, requirement in ipairs(requirements) do
-			if not self:hasBehaviour(requirement:getClass()) then
-				error(
-					string.format(
-						"Entity is missing a behaviour of class: %s, required by the behaviour: %s",
-						requirement.className,
-						behaviour:getClass().className
-					)
-				)
-			end
-		end
-	end
-end
-
 --- @return number
 function Entity:getDrawLayer()
 	return self.drawLayer
