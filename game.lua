@@ -108,9 +108,19 @@ function Game:draw()
 		end
 
 		table.sort(all, function(a, b)
-			local orderA, orderB = a:getDrawOrder(), b:getDrawOrder()
-			local layerA, layerB = a:getDrawLayer(), b:getDrawLayer()
-			return orderA > orderB or (orderA == orderB and layerA > layerB)
+			local entityA, entityB = a:getEntity(), b:getEntity()
+			local priorityA = { entityA:getDrawOrder(), entityA:getDrawLayer(), a:getDrawOrder(), b:getDrawLayer() }
+			local priorityB = { entityB:getDrawOrder(), entityB:getDrawLayer(), b:getDrawOrder(), b:getDrawLayer() }
+
+			for i = 1, 4 do
+				if priorityA[i] > priorityB[i] then
+					return true
+				elseif priorityA[i] < priorityB[i] then
+					return false
+				end
+			end
+
+			return false
 		end)
 
 		return all

@@ -5,6 +5,8 @@
 --- @field private parent? Entity
 --- @field private children Entity[]
 --- @field private destroyed boolean
+--- @field private drawLayer number
+--- @field private drawOrder number
 local Entity = {}
 Entity.__index = Entity
 
@@ -15,6 +17,8 @@ function Entity:new()
 	instance.parent = nil
 	instance.children = {}
 	instance.destroyed = false
+	instance.drawOrder = math.huge
+	instance.drawLayer = math.huge
 	return instance
 end
 
@@ -148,6 +152,26 @@ function Entity:_checkRequirements()
 			end
 		end
 	end
+end
+
+--- @return number
+function Entity:getDrawLayer()
+	return self.drawLayer
+end
+
+--- @return number
+function Entity:getDrawOrder()
+	return self.drawOrder
+end
+---
+--- @param drawLayer number
+function Entity:setDrawLayer(drawLayer)
+	self.drawLayer = drawLayer
+end
+
+--- @param drawOrder number
+function Entity:setDrawOrder(drawOrder)
+	self.drawOrder = drawOrder
 end
 
 return Entity
