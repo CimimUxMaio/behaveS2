@@ -11,15 +11,16 @@ Create dynamic entities and attach customizable behaviors to them, making it eas
 	homepage = "https://github.com/CimimUxMaio/behaveS2",
 	license = "MIT",
 }
+
 build = {
 	type = "builtin",
 	modules = {
-		behaviour = "src/behaviour/init.lua",
-		["behaviour.physicsbody"] = "src/behaviour/physicsbody.lua",
-		camera = "src/camera.lua",
-		entity = "src/entity.lua",
-		game = "src/game.lua",
-		grid = "src/grid.lua",
-		["utils.math"] = "src/utils/math.lua",
+		["behaves2.behaviour"] = "src/behaviour/init.lua",
+		["behaves2.behaviour.physicsbody"] = "src/behaviour/physicsbody.lua",
+		["behaves2.camera"] = "src/camera.lua",
+		["behaves2.entity"] = "src/entity.lua",
+		["behaves2.game"] = "src/game.lua",
+		["behaves2.grid"] = "src/grid.lua",
+		["behaves2.utils.math"] = "src/utils/math.lua",
 	},
 }

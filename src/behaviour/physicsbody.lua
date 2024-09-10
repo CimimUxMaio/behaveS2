@@ -1,4 +1,4 @@
-local Behaviour = require("base.behaviour")
+local Behaviour = require("behaves2.behaviour")
 
 --- @class PhysicsBody : Behaviour
 --- @field protected shape love.Shape

@@ -1,4 +1,4 @@
-local utils = require("base.utils.math")
+local utils = require("behaves2.utils.math")
 
 --- @class Game
 --- @field private entities {[string]: Entity}
