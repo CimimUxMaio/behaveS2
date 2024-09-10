@@ -14,12 +14,12 @@ Create dynamic entities and attach customizable behaviors to them, making it eas
 build = {
 	type = "builtin",
 	modules = {
-		behaviour = "behaviour/init.lua",
-		["behaviour.physicsbody"] = "behaviour/physicsbody.lua",
-		camera = "camera.lua",
-		entity = "entity.lua",
-		game = "game.lua",
-		grid = "grid.lua",
-		["utils.math"] = "utils/math.lua",
+		behaviour = "src/behaviour/init.lua",
+		["behaviour.physicsbody"] = "src/behaviour/physicsbody.lua",
+		camera = "src/camera.lua",
+		entity = "src/entity.lua",
+		game = "src/game.lua",
+		grid = "src/grid.lua",
+		["utils.math"] = "src/utils/math.lua",
 	},
 }
