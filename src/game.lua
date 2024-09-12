@@ -29,10 +29,6 @@ function Game:spawn(entity)
 	end
 
 	entity:raiseEvent("spawn")
-
-	for _, child in ipairs(entity:getChildren()) do
-		self:spawn(child)
-	end
 end
 
 --- @param entity Entity | string
@@ -48,15 +44,6 @@ function Game:destroy(entity)
 
 	for _, behaviour in pairs(entity:getBehaviours()) do
 		self:_unsubscribe(behaviour)
-	end
-
-	local parent = entity:getParent()
-	if parent ~= nil then
-		parent:removeChild(entity)
-	end
-
-	for _, child in ipairs(entity:getChildren()) do
-		self:destroy(child)
 	end
 end
 

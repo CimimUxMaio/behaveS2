@@ -1,24 +1,23 @@
 --- @class Entity
+--- @field protected model table
 --- @field private id string
 --- @field private game Game
 --- @field private behaviours Behaviour[]
---- @field private parent? Entity
---- @field private children Entity[]
 --- @field private destroyed boolean
 --- @field private drawLayer number
 --- @field private drawOrder number
 local Entity = {}
 Entity.__index = Entity
 
+--- @param model table?
 --- @return Entity
-function Entity:new()
+function Entity:new(model)
 	local instance = setmetatable({}, self)
 	instance.behaviours = {}
-	instance.parent = nil
-	instance.children = {}
 	instance.destroyed = false
 	instance.drawOrder = math.huge
 	instance.drawLayer = math.huge
+	instance.model = model or {}
 	return instance
 end
 
@@ -44,16 +43,6 @@ end
 --- @return string
 function Entity:getId()
 	return self.id
-end
-
---- @param parent? Entity
-function Entity:_setParent(parent)
-	self.parent = parent
-end
-
---- @return Entity?
-function Entity:getParent()
-	return self.parent
 end
 
 --- @param behaviour Behaviour
@@ -98,34 +87,6 @@ function Entity:getBehaviours()
 	return self.behaviours
 end
 
---- @param child Entity
-function Entity:addChild(child)
-	table.insert(self.children, child)
-	child._setParent(self)
-
-	if self:isSpawned() and not child:isSpawned() then
-		self.game:spawn(child)
-	end
-
-	return self
-end
-
---- @param child Entity
-function Entity:removeChild(child)
-	for i, c in ipairs(self.children) do
-		if c == child then
-			table.remove(self.children, i)
-			child:_setParent(nil)
-			return
-		end
-	end
-end
-
---- @return Entity[]
-function Entity:getChildren()
-	return self.children
-end
-
 --- @param event string
 --- @param ... any
 function Entity:raiseEvent(event, ...)
@@ -157,6 +118,11 @@ end
 --- @param drawOrder number
 function Entity:setDrawOrder(drawOrder)
 	self.drawOrder = drawOrder
+end
+
+--- @retrun table
+function Entity:getModel()
+	return self.model
 end
 
 return Entity
