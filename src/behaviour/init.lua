@@ -1,6 +1,6 @@
 --- @class Behaviour
---- @field protected requirements Behaviour[]
 --- @field protected entity Entity
+--- @field private requirements Behaviour[]
 --- @field private drawOrder number
 --- @field private drawLayer number
 local Behaviour = {}
@@ -70,6 +70,11 @@ end
 --- @param entity Entity
 function Behaviour:_setEntity(entity)
 	self.entity = entity
+end
+
+--- @return table
+function Behaviour:getModel()
+	return self:getEntity():getModel()
 end
 
 --- @param event string
