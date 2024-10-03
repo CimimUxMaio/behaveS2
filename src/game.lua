@@ -146,4 +146,10 @@ function Game:broadcastEvent(event, ...)
 	end, ...)
 end
 
+function Game:clear()
+	for _, entity in pairs(self.entities) do
+		self:destroy(entity)
+	end
+end
+
 return Game
