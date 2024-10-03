@@ -1,33 +1,40 @@
 local Behaviour = require("behaves2.behaviour")
 
 --- @class PhysicsBody : Behaviour
---- @field protected body love.Body
+--- @field protected fixture love.Fixture
 local PhysicsBody = setmetatable({}, Behaviour)
 PhysicsBody.__index = PhysicsBody
 PhysicsBody.className = "PhysicsBody"
 
---- @param body love.Body
+--- @param fixture love.Fixture
 --- @return PhysicsBody
-function PhysicsBody:new(body)
+function PhysicsBody:new(fixture)
 	local instance = Behaviour.new(self)
-	instance.body = body
+	instance.fixture = fixture
 	return instance
 end
 
 function PhysicsBody:onDestroy()
-	self.body:destroy()
+	self:getBody():destroy()
 end
 
+---@return love.Fixture
+function PhysicsBody:getFixture()
+	return self.fixture
+end
+
+---@return love.Body
 function PhysicsBody:getBody()
-	return self.body
+	return self:getFixture():getBody()
+end
+
+---@return love.Shape
+function PhysicsBody:getShape()
+	return self:getFixture():getShape()
 end
 
 function PhysicsBody:getPosition()
 	return self:getBody():getPosition()
-end
-
-function PhysicsBody:setPosition(x, y)
-	self.body:setPosition(x, y)
 end
 
 return PhysicsBody
