@@ -3,7 +3,8 @@
     "love"
   ],
   "workspace.library": [
-    "${3rd}/love2d/library"
+    "${3rd}/love2d/library",
+    "./lua_modules/share/lua/"
   ],
 
   "runtime.version": "LuaJIT"

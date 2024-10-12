@@ -1,4 +1,6 @@
---- @class Entity
+local class = require("oopsie").class
+
+--- @class Entity : Base
 --- @field protected model table
 --- @field private id string
 --- @field private game Game
@@ -6,19 +8,15 @@
 --- @field private destroyed boolean
 --- @field private drawLayer number
 --- @field private drawOrder number
-local Entity = {}
-Entity.__index = Entity
+local Entity = class("Entity")
 
 --- @param model table?
---- @return Entity
-function Entity:new(model)
-	local instance = setmetatable({}, self)
-	instance.behaviours = {}
-	instance.destroyed = false
-	instance.drawOrder = math.huge
-	instance.drawLayer = math.huge
-	instance.model = model or {}
-	return instance
+function Entity:initialize(model)
+	self.behaviours = {}
+	self.destroyed = false
+	self.drawOrder = math.huge
+	self.drawLayer = math.huge
+	self.model = model or {}
 end
 
 --- @param id string
@@ -58,10 +56,10 @@ function Entity:addBehaviour(behaviour)
 	return self
 end
 
---- @param class Behaviour
-function Entity:removeBehaviour(class)
-	local behaviour = self.behaviours[class]
-	self.behaviours[class] = nil
+--- @param cls Behaviour
+function Entity:removeBehaviour(cls)
+	local behaviour = self.behaviours[cls]
+	self.behaviours[cls] = nil
 
 	if self:isSpawned() and behaviour ~= nil then
 		self.game:_unsubscribe(behaviour)
@@ -69,17 +67,17 @@ function Entity:removeBehaviour(class)
 end
 
 --- @generic T : Behaviour
---- @param class T
+--- @param cls T
 --- @return T
-function Entity:getBehaviour(class)
-	return self.behaviours[class]
+function Entity:getBehaviour(cls)
+	return self.behaviours[cls]
 end
 
 --- @generic T : Behaviour
---- @param class T
+--- @param cls T
 --- @return boolean
-function Entity:hasBehaviour(class)
-	return self:getBehaviour(class) ~= nil
+function Entity:hasBehaviour(cls)
+	return self:getBehaviour(cls) ~= nil
 end
 
 --- @return Behaviour[]

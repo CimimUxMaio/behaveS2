@@ -1,19 +1,16 @@
+local class = require("oopsie").class
 local utils = require("behaves2.utils.math")
 
---- @class Game
+--- @class Game : Base
 --- @field private entities {[string]: Entity}
 --- @field private subscriptions {[string]: {[string]: Behaviour[]}}
 --- @field private destroyed {[string]: boolean}
-local Game = {}
-Game.__index = Game
+local Game = class("Game")
 
---- @return Game
-function Game:new()
-	local instance = setmetatable({}, self)
-	instance.entities = {}
-	instance.subscriptions = {}
-	instance.destroyed = {}
-	return instance
+function Game:initialize()
+	self.entities = {}
+	self.subscriptions = {}
+	self.destroyed = {}
 end
 
 --- @param entity Entity

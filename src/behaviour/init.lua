@@ -1,26 +1,17 @@
---- @class Behaviour
+local class = require("oopsie").class
+
+--- @class Behaviour : Base
 --- @field protected entity Entity
 --- @field private requirements Behaviour[]
 --- @field private drawOrder number
 --- @field private drawLayer number
-local Behaviour = {}
-Behaviour.__index = Behaviour
-Behaviour.className = "<Unnamed Behaviour>"
+local Behaviour = class("Behaviour")
 
---- @generic T : Behaviour
 --- @param requirements Behaviour[] | nil
---- @return T
-function Behaviour:new(requirements)
-	local instance = setmetatable({}, self)
-	instance.requirements = requirements or {}
-	instance.drawOrder = math.huge
-	instance.drawLayer = math.huge
-	return instance
-end
-
---- @return Behaviour
-function Behaviour:getClass()
-	return self.__index
+function Behaviour:initialize(requirements)
+	self.requirements = requirements or {}
+	self.drawOrder = math.huge
+	self.drawLayer = math.huge
 end
 
 --- @return Behaviour[]
@@ -35,7 +26,7 @@ function Behaviour:_checkRequirements()
 				string.format(
 					"Entity is missing a behaviour of class: %s, required by the behaviour: %s",
 					requirement.className,
-					self:getClass().className
+					self.className
 				)
 			)
 		end

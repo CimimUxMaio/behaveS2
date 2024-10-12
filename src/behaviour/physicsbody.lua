@@ -1,17 +1,13 @@
+local extends = require("oopsie").extends
 local Behaviour = require("behaves2.behaviour")
 
 --- @class PhysicsBody : Behaviour
 --- @field protected fixture love.Fixture
-local PhysicsBody = setmetatable({}, Behaviour)
-PhysicsBody.__index = PhysicsBody
-PhysicsBody.className = "PhysicsBody"
+local PhysicsBody = extends("PhysicsBody", Behaviour)
 
 --- @param fixture love.Fixture
---- @return PhysicsBody
-function PhysicsBody:new(fixture)
-	local instance = Behaviour.new(self)
-	instance.fixture = fixture
-	return instance
+function PhysicsBody:initialize(fixture)
+	self.fixture = fixture
 end
 
 function PhysicsBody:onDestroy()
