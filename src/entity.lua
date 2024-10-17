@@ -24,9 +24,19 @@ function Entity:_setId(id)
 	self.id = id
 end
 
+--- @return string
+function Entity:getId()
+	return self.id
+end
+
 --- @parm game Game
 function Entity:_setGame(game)
 	self.game = game
+end
+
+---@return Game
+function Entity:getGame()
+	return self.game
 end
 
 function Entity:_setDestroyed()
@@ -38,15 +48,15 @@ function Entity:isDestroyed()
 	return self.destroyed
 end
 
---- @return string
-function Entity:getId()
-	return self.id
-end
-
 --- @param behaviour Behaviour
 --- @return Entity
 function Entity:addBehaviour(behaviour)
-	self.behaviours[behaviour:getClass()] = behaviour
+	local cls = behaviour:getClass()
+	if self:hasBehaviour(cls) then
+		error(string.format("Entity already contains a behaviour of type %s", behaviour.className))
+	end
+
+	self.behaviours[cls] = behaviour
 	behaviour:_setEntity(self)
 
 	if self:isSpawned() then

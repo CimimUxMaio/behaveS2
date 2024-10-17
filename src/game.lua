@@ -1,5 +1,5 @@
 local class = require("oopsie").class
-local utils = require("behaves2.utils.math")
+local utils = require("utils.math")
 
 --- @class Game : Base
 --- @field private entities {[string]: Entity}
@@ -36,7 +36,10 @@ function Game:destroy(entity)
 
 	entity:raiseEvent("destroy")
 
-	self.entities[entity:getId()] = nil
+	if entity:getId() ~= nil then
+		self.entities[entity:getId()] = nil
+	end
+
 	entity:_setDestroyed()
 
 	for _, behaviour in pairs(entity:getBehaviours()) do
@@ -141,12 +144,6 @@ function Game:broadcastEvent(event, ...)
 
 		return all
 	end, ...)
-end
-
-function Game:clear()
-	for _, entity in pairs(self.entities) do
-		self:destroy(entity)
-	end
 end
 
 return Game
