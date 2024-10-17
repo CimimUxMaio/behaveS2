@@ -4,6 +4,8 @@ local class = require("oopsie").class
 --- @field protected model table
 --- @field private id string
 --- @field private game Game
+--- @field private parent? Entity
+--- @field private children Entity[]
 --- @field private behaviours Behaviour[]
 --- @field private destroyed boolean
 --- @field private drawLayer number
@@ -12,6 +14,7 @@ local Entity = class("Entity")
 
 --- @param model table?
 function Entity:initialize(model)
+	self.children = {}
 	self.behaviours = {}
 	self.destroyed = false
 	self.drawOrder = math.huge
@@ -37,6 +40,16 @@ end
 ---@return Game
 function Entity:getGame()
 	return self.game
+end
+
+---@param parent Entity?
+function Entity:_setParent(parent)
+	self.parent = parent
+end
+
+---@return Entity?
+function Entity:getParent()
+	return self.parent
 end
 
 function Entity:_setDestroyed()
@@ -81,6 +94,34 @@ end
 --- @return T
 function Entity:getBehaviour(cls)
 	return self.behaviours[cls]
+end
+
+---@param child Entity
+function Entity:addChild(child)
+	table.insert(self.children, child)
+	child:_setParent(self)
+
+	if self:isSpawned() then
+		self.game:spawn(child)
+	end
+
+	return self
+end
+
+---@param child Entity
+function Entity:removeChild(child)
+	for i, c in ipairs(self.children) do
+		if c == child then
+			table.remove(self.children, i)
+			child:_setParent(nil)
+			break
+		end
+	end
+end
+
+---@return Entity[]
+function Entity:getChildren()
+	return self.children
 end
 
 --- @generic T : Behaviour

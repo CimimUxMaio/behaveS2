@@ -6,6 +6,8 @@ local Behaviour = require("behaviour")
 describe("#Entity", function()
 	---@type Entity
 	local entity
+	---@type Entity
+	local otherEntity
 	---@type Behaviour
 	local behaviourMock
 	---@type Game
@@ -13,6 +15,7 @@ describe("#Entity", function()
 
 	before_each(function()
 		entity = Entity:new()
+		otherEntity = Entity:new()
 		behaviourMock = Behaviour:new()
 		gameMock = Game:new()
 	end)
@@ -21,6 +24,8 @@ describe("#Entity", function()
 		assert.are.same({}, entity:getBehaviours())
 		assert.are.equal(math.huge, entity:getDrawOrder())
 		assert.are.equal(math.huge, entity:getDrawLayer())
+		assert.is_nil(entity:getParent())
+		assert.are.same({}, entity:getChildren())
 		assert.is_false(entity:isDestroyed())
 	end)
 
@@ -32,6 +37,11 @@ describe("#Entity", function()
 	it("#_setGame #getGame should set and get game", function()
 		entity:_setGame(gameMock)
 		assert.are.equal(gameMock, entity:getGame())
+	end)
+
+	it("#_setParent #getParent should set and get parent entity", function()
+		entity:_setParent(otherEntity)
+		assert.are.equal(otherEntity, entity:getParent())
 	end)
 
 	it("#_setDestroyed #isDestroyed should set destroyed state", function()
@@ -99,6 +109,10 @@ describe("#Entity", function()
 			entity:removeBehaviour(Behaviour)
 			assert.stub(gameMock._unsubscribe).was_not_called()
 		end)
+
+		it("should return the same entity", function()
+			assert.are.equal(entity, entity:addBehaviour(behaviourMock))
+		end)
 	end)
 
 	describe("#removeBehaviour", function()
@@ -139,6 +153,80 @@ describe("#Entity", function()
 			entity:_setGame(gameMock)
 			entity:removeBehaviour(Behaviour)
 			assert.stub(gameMock._unsubscribe).was_not_called()
+		end)
+	end)
+
+	describe("#addChild", function()
+		local childEntity
+
+		before_each(function()
+			childEntity = Entity:new()
+		end)
+
+		it("should add a child entity to the children list", function()
+			entity:addChild(otherEntity)
+			assert.has(entity:getChildren(), otherEntity)
+		end)
+
+		it("should be able to add multiple children", function()
+			entity:addChild(otherEntity)
+			entity:addChild(childEntity)
+			assert.are.same({ otherEntity, childEntity }, entity:getChildren())
+		end)
+
+		it("should spawn the child if the entity is already spawned", function()
+			stub(gameMock, "spawn")
+			entity:_setGame(gameMock)
+			entity:addChild(otherEntity)
+			assert.stub(gameMock.spawn).was_called_with(gameMock, otherEntity)
+		end)
+
+		it("should not spawn the child if the entity is not spawned", function()
+			stub(gameMock, "spawn")
+			stub(entity, "isSpawned").returns(false)
+			entity:_setGame(gameMock)
+			entity:addChild(otherEntity)
+			assert.stub(gameMock.spawn).was_not_called()
+		end)
+
+		it("should set the parent of the child entity to self", function()
+			entity:addChild(otherEntity)
+			assert.are.equal(entity, otherEntity:getParent())
+		end)
+	end)
+
+	describe("#removeChild", function()
+		local childEntity
+
+		before_each(function()
+			childEntity = Entity:new()
+		end)
+
+		it("should remove a child entity from the children list", function()
+			entity:addChild(otherEntity)
+			entity:removeChild(otherEntity)
+			assert.has_no(entity:getChildren(), otherEntity)
+		end)
+
+		it("should not remove children other than the given one", function()
+			entity:addChild(otherEntity)
+			entity:addChild(childEntity)
+			entity:removeChild(otherEntity)
+			assert.has_no(entity:getChildren(), otherEntity)
+			assert.has(entity:getChildren(), childEntity)
+		end)
+
+		it("should set the parent of the child entity to nil", function()
+			entity:addChild(otherEntity)
+			entity:removeChild(otherEntity)
+			assert.is_nil(otherEntity:getParent())
+		end)
+
+		it("should not modify other children's parent property", function()
+			entity:addChild(otherEntity)
+			entity:addChild(childEntity)
+			entity:removeChild(otherEntity)
+			assert.are.equal(entity, childEntity:getParent())
 		end)
 	end)
 

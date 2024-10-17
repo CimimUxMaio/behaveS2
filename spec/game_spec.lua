@@ -26,6 +26,14 @@ describe("#Game", function()
 	end)
 
 	describe("#spawn", function()
+		local childEntityMock1
+		local childEntityMock2
+
+		before_each(function()
+			childEntityMock1 = Entity:new()
+			childEntityMock2 = Entity:new()
+		end)
+
 		it("should add the given entity to the entities table", function()
 			game:spawn(entityMock)
 			assert.has(entityMock, game.entities)
@@ -57,11 +65,35 @@ describe("#Game", function()
 			game:spawn(entityMock)
 			assert.stub(entityMock._setGame).was_called_with(match.is_ref(entityMock), match.is_ref(game))
 		end)
+
+		it("should also spawn the entity's children", function()
+			stub(entityMock, "getChildren").returns({ childEntityMock1, childEntityMock2 })
+			spy.on(game, "spawn")
+			game:spawn(entityMock)
+			assert.spy(game.spawn).was_called_with(match.is_ref(game), match.is_ref(entityMock))
+			assert.spy(game.spawn).was_called_with(match.is_ref(game), match.is_ref(childEntityMock1))
+			assert.spy(game.spawn).was_called_with(match.is_ref(game), match.is_ref(childEntityMock2))
+			assert.spy(game.spawn).was_called(3)
+		end)
+
+		it("should not not call spawn additional times if the entity has no children", function()
+			spy.on(game, "spawn")
+			game:spawn(entityMock)
+			assert.spy(game.spawn).was_called(1)
+		end)
 	end)
 
 	describe("#destroy", function()
 		describe("if present,", function()
+			local parentEntityMock
+			local childEntityMock1
+			local childEntityMock2
+
 			before_each(function()
+				parentEntityMock = Entity:new()
+				childEntityMock1 = Entity:new()
+				childEntityMock2 = Entity:new()
+
 				stub(utils, "uuid").returns("entity_id")
 				game:spawn(entityMock)
 			end)
@@ -83,6 +115,23 @@ describe("#Game", function()
 			it("should remove the entity from the entities table given its ID string", function()
 				game:destroy("entity_id")
 				assert.is_nil(game.entities["entity_id"])
+			end)
+
+			it("if it has a parent, it should remove itself from it's parent children", function()
+				stub(entityMock, "getParent").returns(parentEntityMock)
+				stub(parentEntityMock, "removeChild")
+				game:destroy(entityMock)
+				assert.stub(parentEntityMock.removeChild).was_called_with(parentEntityMock, entityMock)
+			end)
+
+			it("should also destroy the entity's children", function()
+				stub(entityMock, "getChildren").returns({ childEntityMock1, childEntityMock2 })
+				spy.on(game, "destroy")
+				game:destroy(entityMock)
+				assert.spy(game.destroy).was_called_with(match.is_ref(game), match.is_ref(entityMock))
+				assert.spy(game.destroy).was_called_with(match.is_ref(game), match.is_ref(childEntityMock1))
+				assert.spy(game.destroy).was_called_with(match.is_ref(game), match.is_ref(childEntityMock2))
+				assert.spy(game.destroy).was_called(3)
 			end)
 		end)
 
