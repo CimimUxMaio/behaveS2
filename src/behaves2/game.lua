@@ -1,5 +1,5 @@
 local class = require("oopsie").class
-local utils = require("utils.math")
+local utils = require("behaves2.utils.math")
 
 --- @class Game : Base
 --- @field private entities {[string]: Entity}

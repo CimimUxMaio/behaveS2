@@ -1,6 +1,6 @@
 local extends = require("oopsie").extends
-local Entity = require("entity")
-local Behaviour = require("behaviour")
+local Entity = require("behaves2.entity")
+local Behaviour = require("behaves2.behaviour")
 
 describe("#Behaviour", function()
 	local model

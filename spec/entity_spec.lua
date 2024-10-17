@@ -1,7 +1,7 @@
 local extends = require("oopsie").extends
-local Game = require("game")
-local Entity = require("entity")
-local Behaviour = require("behaviour")
+local Game = require("behaves2.game")
+local Entity = require("behaves2.entity")
+local Behaviour = require("behaves2.behaviour")
 
 describe("#Entity", function()
 	---@type Entity

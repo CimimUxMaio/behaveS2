@@ -19,11 +19,11 @@ dependencies = {
 build = {
 	type = "builtin",
 	modules = {
-		["behaves2.behaviour.init"] = "src/behaviour/init.lua",
-		["behaves2.behaviour.physicsbody"] = "src/behaviour/physicsbody.lua",
-		["behaves2.entity"] = "src/entity.lua",
-		["behaves2.game"] = "src/game.lua",
-		["behaves2.utils.math"] = "src/utils/math.lua",
+		["behaves2.behaviour.init"] = "src/behaves2/behaviour/init.lua",
+		["behaves2.behaviour.physicsbody"] = "src/behaves2/behaviour/physicsbody.lua",
+		["behaves2.entity"] = "src/behaves2/entity.lua",
+		["behaves2.game"] = "src/behaves2/game.lua",
+		["behaves2.utils.math"] = "src/behaves2/utils/math.lua",
 	},
 }
 test_dependencies = {

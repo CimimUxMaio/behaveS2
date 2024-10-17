@@ -1,8 +1,8 @@
-local Game = require("game")
-local Entity = require("entity")
-local Behaviour = require("behaviour")
+local Game = require("behaves2.game")
+local Entity = require("behaves2.entity")
+local Behaviour = require("behaves2.behaviour")
 local match = require("luassert.match")
-local utils = require("utils.math")
+local utils = require("behaves2.utils.math")
 
 describe("#Game", function()
 	local game
