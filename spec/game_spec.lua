@@ -55,9 +55,9 @@ describe("#Game", function()
 		end)
 
 		it("should set the entity's #_setId method", function()
-			stub(entityMock, "_setId")
+			spy.on(entityMock, "_setId")
 			game:spawn(entityMock)
-			assert.stub(entityMock._setId).was_called_with(match.is_ref(entityMock), match.is_string())
+			assert.spy(entityMock._setId).was_called_with(match.is_ref(entityMock), match.is_string())
 		end)
 
 		it("#should call the entity's #_setGame method", function()

@@ -24,6 +24,8 @@ build = {
 		["behaves2.entity"] = "src/behaves2/entity.lua",
 		["behaves2.game"] = "src/behaves2/game.lua",
 		["behaves2.utils.math"] = "src/behaves2/utils/math.lua",
+		["behaves2.utils.logger"] = "src/behaves2/utils/logger.lua",
+		["behaves2.utils.logging"] = "src/behaves2/utils/logging.lua",
 	},
 }
 test_dependencies = {

@@ -49,7 +49,10 @@ function Game:destroy(entity)
 	end
 
 	entity:_setDestroyed()
-	logger:debug("Entity destroyed: " .. entity:getId())
+
+	if entity:getId() ~= nil then
+		logger:debug("Entity destroyed: " .. entity:getId())
+	end
 
 	for _, behaviour in pairs(entity:getBehaviours()) do
 		self:_unsubscribe(behaviour)
