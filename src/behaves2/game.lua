@@ -1,5 +1,8 @@
 local class = require("oopsie").class
 local utils = require("behaves2.utils.math")
+local Logger = require("behaves2.utils.logging")
+
+local logger = Logger:new("Game")
 
 --- @class Game : Base
 --- @field private entities {[string]: Entity}
@@ -26,6 +29,7 @@ function Game:spawn(entity)
 	end
 
 	entity:raiseEvent("spawn")
+	logger:debug("Entity spawned: " .. entity:getId())
 
 	for _, child in ipairs(entity:getChildren()) do
 		self:spawn(child)
@@ -45,6 +49,7 @@ function Game:destroy(entity)
 	end
 
 	entity:_setDestroyed()
+	logger:debug("Entity destroyed: " .. entity:getId())
 
 	for _, behaviour in pairs(entity:getBehaviours()) do
 		self:_unsubscribe(behaviour)
@@ -73,6 +78,10 @@ function Game:_subscribe(behaviour)
 		table.insert(self.subscriptions[event][entityId], behaviour)
 	end
 
+	logger:debug(
+		string.format("Subscribed behaviour %s for entity: %s", behaviour.className, behaviour:getEntity():getId())
+	)
+
 	behaviour:handleEvent("ready")
 end
 
@@ -94,12 +103,26 @@ function Game:_unsubscribe(behaviour)
 		end
 	end
 
+	logger:debug(string.format("Unsubscribed behaviour %s for entity: %s", behaviour.className, entityId))
+
 	behaviour:handleEvent("remove")
 end
 
 --- @param dt number
 function Game:update(dt)
 	self:broadcastEvent("update", dt)
+
+	local entityCount = 0
+	for _ in pairs(self.entities) do
+		entityCount = entityCount + 1
+	end
+
+	local subscriptionCount = 0
+	for _ in pairs(self.subscriptions) do
+		subscriptionCount = subscriptionCount + 1
+	end
+
+	logger:debug(string.format("Game updated - Entities: %d - Subscriptions: %d", entityCount, subscriptionCount))
 end
 
 function Game:draw()
@@ -157,6 +180,8 @@ function Game:broadcastEvent(event, ...)
 
 		return all
 	end, ...)
+
+	logger:debug(string.format("Event broadcast - Event: %s", event))
 end
 
 return Game
