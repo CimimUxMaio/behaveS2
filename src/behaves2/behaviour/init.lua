@@ -7,20 +7,21 @@ local class = require("oopsie").class
 --- @field private drawLayer number
 local Behaviour = class("Behaviour")
 
---- @param requirements Behaviour[] | nil
+--- @param requirements Behaviour[]
 function Behaviour:initialize(requirements)
-	self.requirements = requirements or {}
-	self.drawOrder = math.huge
-	self.drawLayer = math.huge
+	self.requirements = requirements
 end
 
 --- @return Behaviour[]
 function Behaviour:getRequirements()
+	if self.requirements == nil then
+		self.requirements = {}
+	end
 	return self.requirements
 end
 
 function Behaviour:_checkRequirements()
-	for _, requirement in ipairs(self.requirements) do
+	for _, requirement in ipairs(self:getRequirements()) do
 		if not self.entity:hasBehaviour(requirement) then
 			error(
 				string.format(
@@ -35,22 +36,28 @@ end
 
 --- @return number
 function Behaviour:getDrawOrder()
+	if self.drawOrder == nil then
+		self.drawOrder = math.huge
+	end
 	return self.drawOrder
+end
+
+--- @param drawOrder number
+function Behaviour:setDrawOrder(drawOrder)
+	self.drawOrder = drawOrder
 end
 
 --- @param drawLayer number
 function Behaviour:setDrawLayer(drawLayer)
 	self.drawLayer = drawLayer
 end
----
+
 --- @return number
 function Behaviour:getDrawLayer()
+	if self.drawLayer == nil then
+		self.drawLayer = math.huge
+	end
 	return self.drawLayer
-end
-
---- @param drawOrder number
-function Behaviour:setDrawOrder(drawOrder)
-	self.drawOrder = drawOrder
 end
 
 --- @return Entity
