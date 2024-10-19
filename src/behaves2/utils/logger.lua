@@ -2,9 +2,9 @@ local class = require("oopsie").class
 
 ---@class Logger : Base
 ---@field private name string
----@field private level LogLevel
 ---@field private format string
 ---@field private outputFile file*
+---@field private logLevel LogLevel
 local Logger = class("Logger")
 
 local function readOnlyTable(table)
@@ -38,13 +38,21 @@ local LogLevelStr = {
 	[LogLevel.DISABLED] = "DISABLED",
 }
 
+---@param logLevel LogLevel
+function Logger.setLogLevel(logLevel)
+	Logger.logLevel = logLevel
+end
+
+---@return LogLevel
+function Logger.getLogLevel()
+	return Logger.logLevel
+end
+
 --- @param name string?
---- @param level LogLevel?
 --- @param format string?
 --- @param file file*? Defaults to io.stdout
-function Logger:initialize(name, level, format, file)
+function Logger:initialize(name, format, file)
 	self.name = name or ""
-	self.level = level or self:getDefaultLevel()
 	self.format = format or self:getDefaultFormat()
 	self.outputFile = file or io.stdout
 end
@@ -69,11 +77,6 @@ function Logger:getOutputFile()
 	return self.outputFile
 end
 
----@return LogLevel
-function Logger:getLogLevel()
-	return self.level
-end
-
 ---@return string
 function Logger:getFormat()
 	return self.format
@@ -82,11 +85,6 @@ end
 ---@param name string
 function Logger:setName(name)
 	self.name = name
-end
-
----@param level LogLevel
-function Logger:setLogLevel(level)
-	self.level = level
 end
 
 ---@param format string
@@ -106,7 +104,7 @@ function Logger:log(level, message)
 		return
 	end
 
-	local formattedMessage = self:formatMessage(message)
+	local formattedMessage = self:formatMessage(level, message)
 
 	local previousFile = io.output()
 	io.output(self:getOutputFile())
@@ -139,24 +137,28 @@ function Logger:fatal(message)
 	self:log(LogLevel.FATAL, message)
 end
 
+---@alias Formatter function(logger: Logger, level: LogLevel, message: string): string
+---@type table<string, Formatter>
 Logger.PatternFormatters = {
 	["Name"] = Logger.getName,
 	["DateTime"] = function()
 		return os.date("%Y-%m-%d %H:%M:%S")
 	end,
-	["LogLevel"] = function(logger, _)
-		return LogLevelStr[logger:getLogLevel()]
+	["LogLevel"] = function(_, logLevel, _)
+		return LogLevelStr[logLevel]
 	end,
-	["Message"] = function(_, message)
+	["Message"] = function(_, _, message)
 		return message
 	end,
 }
 
+---@param logLevel LogLevel
+---@param message string
 ---@return string
-function Logger:formatMessage(message)
+function Logger:formatMessage(logLevel, message)
 	local formatedMessage = self:getFormat()
 	for pattern, formatter in pairs(Logger.PatternFormatters) do
-		formatedMessage = formatedMessage:gsub("%%" .. pattern, formatter(self, message))
+		formatedMessage = formatedMessage:gsub("%%" .. pattern, formatter(self, logLevel, message))
 	end
 
 	return formatedMessage
