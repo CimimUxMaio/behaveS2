@@ -122,9 +122,11 @@ function Game:_unsubscribe(behaviour)
 		end
 	end
 
-	logger:debug(string.format("Unsubscribed behaviour %s for entity: %s", behaviour.className, entityId))
-
 	behaviour:handleEvent("remove")
+
+	logger:debug(
+		string.format("Unsubscribed - Behaviour: %s - Entity: %s", behaviour.className, behaviour:getEntity():getId())
+	)
 end
 
 --- @param dt number
