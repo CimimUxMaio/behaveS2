@@ -50,6 +50,8 @@ function Game:destroy(entity)
 		entity = self.entities[entity]
 	end
 
+	logger:debug("Destroying entity: " .. entity:getId() or nil)
+
 	entity:raiseEvent("destroy")
 
 	if entity:getId() ~= nil then
@@ -58,10 +60,6 @@ function Game:destroy(entity)
 
 	entity:_setDestroyed()
 
-	if entity:getId() ~= nil then
-		logger:debug("Entity destroyed: " .. entity:getId())
-	end
-
 	for _, behaviour in pairs(entity:getBehaviours()) do
 		self:_unsubscribe(behaviour)
 	end
@@ -69,11 +67,16 @@ function Game:destroy(entity)
 	local parent = entity:getParent()
 	if parent ~= nil then
 		parent:removeChild(entity)
+		logger:debug("Detached entity: " .. entity:getId() or "nil" .. " from parent")
 	end
 
+	logger:debug("Destroying children for entity: " .. entity:getId())
 	for _, child in ipairs(entity:getChildren()) do
 		self:destroy(child)
 	end
+	logger:debug("Finished destroying children for entity: " .. entity:getId())
+
+	logger:debug("Finished destroying entity: " .. entity:getId() or nil)
 end
 
 --- @param behaviour Behaviour
