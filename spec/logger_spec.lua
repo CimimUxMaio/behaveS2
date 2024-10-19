@@ -49,7 +49,6 @@ describe("#Logger", function()
 		local logger
 
 		before_each(function()
-			Logger.setLogLevel(Logger.LogLevel.INFO) -- Set default log level back
 			logger = Logger:new()
 		end)
 
@@ -68,7 +67,6 @@ describe("#Logger", function()
 
 		it("should replace %Message with the corresponding message", function()
 			local level = Logger.LogLevel.FATAL
-			Logger.setLogLevel(level)
 			logger:setFormat("Message: %Message")
 			local formatedMessage = logger:formatMessage(level, "Hello World!")
 			assert.are.equal("Message: Hello World!", formatedMessage)
@@ -76,7 +74,6 @@ describe("#Logger", function()
 
 		it("should replace %DateTime with the current date and time", function()
 			local level = Logger.LogLevel.FATAL
-			Logger.setLogLevel(level)
 			logger:setFormat("%DateTime")
 			stub(os, "date").returns("2020-01-01 00:00:00")
 			local formatedMessage = logger:formatMessage(level, "Example")
@@ -85,7 +82,6 @@ describe("#Logger", function()
 
 		it("should replace multiple different patterns", function()
 			local level = Logger.LogLevel.WARN
-			Logger.setLogLevel(level)
 			logger:setFormat("[%LogLevel] %Message")
 			local formatedMessage = logger:formatMessage(level, "Test message")
 			assert.are.equal("[WARN] Test message", formatedMessage)
@@ -93,7 +89,6 @@ describe("#Logger", function()
 
 		it("should replace multiple equal patterns", function()
 			local level = Logger.LogLevel.ERROR
-			logger:setLogLevel(level)
 			logger:setFormat("%LogLevel %LogLevel %LogLevel")
 			local formatedMessage = logger:formatMessage(level, "Test message")
 			assert.are.equal("ERROR ERROR ERROR", formatedMessage)
@@ -153,7 +148,8 @@ describe("#Logger", function()
 			end)
 		end)
 
-		it("should write messages to output file", function()
+		it("should write messages to output file if the log level allows it", function()
+			Logger.setLogLevel(Logger.LogLevel.INFO) -- Set log level to info since it is DISABLED as default
 			logger:setFormat("%Message")
 
 			logger:log(Logger.LogLevel.INFO, "This is an info message")
@@ -164,10 +160,10 @@ describe("#Logger", function()
 		end)
 
 		it("should not write messages to output file if the message's log level is lower than the logger's", function()
-			Logger.setLogLevel(Logger.LogLevel.WARN)
+			Logger.setLogLevel(Logger.LogLevel.ERROR)
 			logger:setFormat("%Message")
 
-			logger:log(Logger.LogLevel.INFO, "This is an info message")
+			logger:log(Logger.LogLevel.DEBUG, "This is an info message")
 
 			stub(io, "write")
 			assert.stub(io.write).was_not_called()

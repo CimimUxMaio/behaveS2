@@ -38,6 +38,8 @@ local LogLevelStr = {
 	[LogLevel.DISABLED] = "DISABLED",
 }
 
+Logger.logLevel = LogLevel.DISABLED -- Default log level
+
 ---@param logLevel LogLevel
 function Logger.setLogLevel(logLevel)
 	Logger.logLevel = logLevel
@@ -60,11 +62,6 @@ end
 ---@return string
 function Logger:getDefaultFormat()
 	return "%DateTime [%LogLevel]: %Message\n"
-end
-
----@return LogLevel
-function Logger:getDefaultLevel()
-	return LogLevel.INFO
 end
 
 ---@return string
