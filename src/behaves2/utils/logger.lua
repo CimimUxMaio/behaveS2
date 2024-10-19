@@ -19,8 +19,8 @@ end
 
 ---@enum LogLevel
 Logger.LogLevel = readOnlyTable({
-	INFO = 0,
-	DEBUG = 1,
+	DEBUG = 0,
+	INFO = 1,
 	WARN = 2,
 	ERROR = 3,
 	FATAL = 4,
@@ -30,15 +30,15 @@ Logger.LogLevel = readOnlyTable({
 local LogLevel = Logger.LogLevel
 
 local LogLevelStr = {
-	[LogLevel.INFO] = "INFO",
 	[LogLevel.DEBUG] = "DEBUG",
+	[LogLevel.INFO] = "INFO",
 	[LogLevel.WARN] = "WARN",
 	[LogLevel.ERROR] = "ERROR",
 	[LogLevel.FATAL] = "FATAL",
 	[LogLevel.DISABLED] = "DISABLED",
 }
 
-Logger.logLevel = LogLevel.DISABLED -- Default log level
+Logger.logLevel = LogLevel.INFO -- Default log level
 
 ---@param logLevel LogLevel
 function Logger.setLogLevel(logLevel)
