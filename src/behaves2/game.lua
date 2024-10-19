@@ -18,22 +18,30 @@ end
 
 --- @param entity Entity
 function Game:spawn(entity)
+	if entity:isSpawned() then
+		error(string.format("Entity %s was already spawned", entity:getId()))
+	end
+
 	local id = utils.uuid()
 	entity:_setId(id)
 	entity:_setGame(self)
 
 	self.entities[id] = entity
 
+	logger:debug("Spawning entity: " .. entity:getId())
+
+	logger:debug("Spawning children for entity: " .. entity:getId())
+	for _, child in ipairs(entity:getChildren()) do
+		self:spawn(child)
+	end
+	logger:debug("Finished spawning children for entity: " .. entity:getId())
+
 	for _, behaviour in pairs(entity:getBehaviours()) do
 		self:_subscribe(behaviour)
 	end
 
 	entity:raiseEvent("spawn")
-	logger:debug("Entity spawned: " .. entity:getId())
-
-	for _, child in ipairs(entity:getChildren()) do
-		self:spawn(child)
-	end
+	logger:debug("Finished spawning entity: " .. entity:getId())
 end
 
 --- @param entity Entity | string
@@ -79,11 +87,16 @@ function Game:_subscribe(behaviour)
 		self.subscriptions[event] = self.subscriptions[event] or {}
 		self.subscriptions[event][entityId] = self.subscriptions[event][entityId] or {}
 		table.insert(self.subscriptions[event][entityId], behaviour)
-	end
 
-	logger:debug(
-		string.format("Subscribed behaviour %s for entity: %s", behaviour.className, behaviour:getEntity():getId())
-	)
+		logger:debug(
+			string.format(
+				"Subscribed - Event: %s - Behaviour: %s - Entity: %s",
+				event,
+				behaviour.className,
+				behaviour:getEntity():getId()
+			)
+		)
+	end
 
 	behaviour:handleEvent("ready")
 end

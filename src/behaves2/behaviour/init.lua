@@ -89,13 +89,21 @@ end
 function Behaviour:handledEvents()
 	local events = {}
 
-	for key, value in pairs(self) do
-		local event, match = string.gsub(key, "^on(%u%l+)", "%1")
-		if match > 0 and type(value) == "function" then
-			event = string.gsub(event, "^%u", string.lower)
-			table.insert(events, event)
+	local function traverseClass(cls)
+		for key, value in pairs(cls) do
+			local event, match = string.gsub(key, "^on(%u%l+)", "%1")
+			if match > 0 and type(value) == "function" then
+				event = string.gsub(event, "^%u", string.lower)
+				table.insert(events, event)
+			end
+		end
+
+		if cls:getClass() ~= nil then
+			traverseClass(cls:getClass())
 		end
 	end
+
+	traverseClass(self)
 
 	return events
 end

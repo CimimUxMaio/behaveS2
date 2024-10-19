@@ -10,8 +10,11 @@ function Behaves2Logger:initialize(name, file)
 	self:setName("BehaveS2")
 
 	local logLevel = Logger.LogLevel.DISABLED
-	if arg[1] == "--debug" then
-		logLevel = Logger.LogLevel.DEBUG
+
+	for _, v in ipairs(arg) do
+		if v == "--debug" then
+			logLevel = Logger.LogLevel.DEBUG
+		end
 	end
 
 	self:setLogLevel(logLevel)

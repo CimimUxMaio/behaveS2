@@ -69,9 +69,21 @@ describe("#Behaviour", function()
 		function behaviourMock:onTestEvent() end
 		function behaviourMock:onOtherEvent() end
 		function behaviourMock:onUpdate() end
+		function behaviourMock:onReady() end
 		local events = behaviourMock:handledEvents()
 		table.sort(events)
-		assert.are.same({ "otherEvent", "testEvent", "update" }, events)
+		assert.are.same({ "otherEvent", "ready", "testEvent", "update" }, events)
+	end)
+
+	it("#handledEvents should return handled event names for subclasses", function()
+		local OtherBehaviourCls = extends("OtherBehaviourCls", Behaviour)
+		---@class OtherBehaviourCls : Behaviour
+		local otherBehaviour = OtherBehaviourCls:new()
+		function otherBehaviour:onTestEvent() end
+		function otherBehaviour:onUpdate() end
+		local events = otherBehaviour:handledEvents()
+		table.sort(events)
+		assert.are.same({ "testEvent", "update" }, events)
 	end)
 
 	describe("#_checkRequirements", function()

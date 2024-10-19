@@ -101,7 +101,7 @@ function Entity:addChild(child)
 	table.insert(self.children, child)
 	child:_setParent(self)
 
-	if self:isSpawned() then
+	if self:isSpawned() and not child:isSpawned() then
 		self.game:spawn(child)
 	end
 
