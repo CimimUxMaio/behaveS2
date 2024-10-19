@@ -5,9 +5,15 @@ local Behaves2Logger = extends("Behaves2Logger", Logger)
 
 local logLevel = Logger.LogLevel.DISABLED
 
-for _, v in ipairs(arg) do
+for n, v in ipairs(arg) do
 	if v == "--debug" then
 		logLevel = Logger.LogLevel.DEBUG
+	elseif v == "--log-level" then
+		local str = arg[n + 1]
+		local level = Logger.LogLevel[string.upper(str)]
+		if level ~= nil then
+			logLevel = level
+		end
 	end
 end
 
