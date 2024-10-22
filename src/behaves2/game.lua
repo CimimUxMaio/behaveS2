@@ -30,12 +30,17 @@ function Game:spawn(entity)
 
 	logger:debug(string.format("Spawning %s: %s", entity.className, entity:getId()))
 
-	logger:debug(string.format("Spawning children for %s: %s", entity.className, entity:getId()))
+	logger:debug(
+		string.format("Spawning %d children for %s: %s", #entity:getChildren(), entity.className, entity:getId())
+	)
 	for _, child in ipairs(entity:getChildren()) do
 		self:spawn(child)
 	end
 	logger:debug(string.format("Finished spawning children for %s: %s", entity.className, entity:getId()))
 
+	logger:debug(
+		string.format("Subscribing %d behaviours for %s: %s", #entity:getBehaviours(), entity.className, entity:getId())
+	)
 	for _, behaviour in pairs(entity:getBehaviours()) do
 		self:_subscribe(behaviour)
 	end
@@ -64,7 +69,14 @@ function Game:destroy(entity)
 
 	entity:_setDestroyed()
 
-	logger:debug(string.format("Unsubscribing behaviours for %s: %s", entity.className, entity:getId() or "nil"))
+	logger:debug(
+		string.format(
+			"Unsubscribing %d behaviours from %s: %s",
+			#entity:getBehaviours(),
+			entity.className,
+			entity:getId() or "nil"
+		)
+	)
 	for _, behaviour in pairs(entity:getBehaviours()) do
 		self:_unsubscribe(behaviour)
 	end
@@ -75,7 +87,14 @@ function Game:destroy(entity)
 		logger:debug(string.format("Detached %s: %s from parent", entity.className, entity:getId() or "nil"))
 	end
 
-	logger:debug(string.format("Destroying children for %s: %s", entity.className, entity:getId() or "nil"))
+	logger:debug(
+		string.format(
+			"Destroying %d children for %s: %s",
+			#entity:getChildren(),
+			entity.className,
+			entity:getId() or "nil"
+		)
+	)
 	local children = { unpack(entity:getChildren()) }
 	for _, child in ipairs(children) do
 		self:destroy(child)
