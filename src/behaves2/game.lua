@@ -19,7 +19,7 @@ end
 --- @param entity Entity
 function Game:spawn(entity)
 	if entity:isSpawned() then
-		error(string.format("Entity %s was already spawned", entity:getId()))
+		error(string.format("%s %s was already spawned", entity.className, entity:getId()))
 	end
 
 	local id = utils.uuid()
@@ -28,29 +28,33 @@ function Game:spawn(entity)
 
 	self.entities[id] = entity
 
-	logger:debug("Spawning entity: " .. entity:getId())
+	logger:debug(string.format("Spawning %s: %s", entity.className, entity:getId()))
 
-	logger:debug("Spawning children for entity: " .. entity:getId())
+	logger:debug(string.format("Spawning children for %s: %s", entity.className, entity:getId()))
 	for _, child in ipairs(entity:getChildren()) do
 		self:spawn(child)
 	end
-	logger:debug("Finished spawning children for entity: " .. entity:getId())
+	logger:debug(string.format("Finished spawning children for %s: %s", entity.className, entity:getId()))
 
 	for _, behaviour in pairs(entity:getBehaviours()) do
 		self:_subscribe(behaviour)
 	end
 
 	entity:raiseEvent("spawn")
-	logger:debug("Finished spawning entity: " .. entity:getId())
+	logger:debug(string.format("Finished spawning %s: %s", entity.className, entity:getId()))
 end
 
 --- @param entity Entity | string
 function Game:destroy(entity)
 	if type(entity) == "string" then
-		entity = self.entities[entity]
+		local id = entity
+		entity = self.entities[id]
+		assert(entity ~= nil, string.format("Attempted to destroy non-existent Entity with ID %s", id))
 	end
 
-	logger:debug(string.format("Destroying entity: %s", entity:getId() or "nil"))
+	assert(entity:isSpawned(), string.format("Attempted to destroy %s, but it was not spawned", entity.className))
+
+	logger:debug(string.format("Destroying %s: %s", entity.className, entity:getId() or "nil"))
 
 	entity:raiseEvent("destroy")
 
@@ -60,6 +64,7 @@ function Game:destroy(entity)
 
 	entity:_setDestroyed()
 
+	logger:debug(string.format("Unsubscribing behaviours for %s: %s", entity.className, entity:getId() or "nil"))
 	for _, behaviour in pairs(entity:getBehaviours()) do
 		self:_unsubscribe(behaviour)
 	end
@@ -67,16 +72,17 @@ function Game:destroy(entity)
 	local parent = entity:getParent()
 	if parent ~= nil then
 		parent:removeChild(entity)
-		logger:debug(string.format("Detached entity: %s from parent", entity:getId() or "nil"))
+		logger:debug(string.format("Detached %s: %s from parent", entity.className, entity:getId() or "nil"))
 	end
 
-	logger:debug(string.format("Destroying children for entity: %s", entity:getId() or "nil"))
-	for _, child in ipairs(entity:getChildren()) do
+	logger:debug(string.format("Destroying children for %s: %s", entity.className, entity:getId() or "nil"))
+	local children = { unpack(entity:getChildren()) }
+	for _, child in ipairs(children) do
 		self:destroy(child)
 	end
-	logger:debug(string.format("Finished destroying children for entity: %s", entity:getId() or "nil"))
+	logger:debug(string.format("Finished destroying children for %s: %s", entity.className, entity:getId() or "nil"))
 
-	logger:debug(string.format("Finished destroying entity: %s", entity:getId() or "nil"))
+	logger:debug(string.format("Finished destroying %s: %s", entity.className, entity:getId() or "nil"))
 end
 
 --- @param behaviour Behaviour
@@ -93,9 +99,10 @@ function Game:_subscribe(behaviour)
 
 		logger:debug(
 			string.format(
-				"Subscribed - Event: %s - Behaviour: %s - Entity: %s",
+				"Subscribed - Event: %s - Behaviour: %s - %s: %s",
 				event,
 				behaviour.className,
+				behaviour:getEntity().className,
 				behaviour:getEntity():getId()
 			)
 		)
@@ -125,7 +132,12 @@ function Game:_unsubscribe(behaviour)
 	behaviour:handleEvent("remove")
 
 	logger:debug(
-		string.format("Unsubscribed - Behaviour: %s - Entity: %s", behaviour.className, behaviour:getEntity():getId())
+		string.format(
+			"Unsubscribed - Behaviour: %s - %s: %s",
+			behaviour.className,
+			behaviour:getEntity().className,
+			behaviour:getEntity():getId()
+		)
 	)
 end
 
@@ -191,6 +203,8 @@ end
 --- @param event string
 --- @param ... any
 function Game:broadcastEvent(event, ...)
+	logger:debug(string.format("Event broadcast - Event: %s", event))
+
 	self:raiseEvent(event, function(subscribers)
 		local all = {}
 		for _, behaviours in pairs(subscribers) do
@@ -201,8 +215,6 @@ function Game:broadcastEvent(event, ...)
 
 		return all
 	end, ...)
-
-	logger:debug(string.format("Event broadcast - Event: %s", event))
 end
 
 return Game

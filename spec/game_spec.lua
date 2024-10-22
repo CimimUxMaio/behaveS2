@@ -92,25 +92,21 @@ describe("#Game", function()
 	end)
 
 	describe("#destroy", function()
-		describe("if present,", function()
-			local parentEntityMock
-			local childEntityMock1
-			local childEntityMock2
+		before_each(function()
+			stub(utils, "uuid").returns("entity_id")
+			game:spawn(entityMock)
+			---@diagnostic disable-next-line: undefined-field
+			utils.uuid:revert()
+		end)
 
-			before_each(function()
-				parentEntityMock = Entity:new()
-				childEntityMock1 = Entity:new()
-				childEntityMock2 = Entity:new()
-
-				stub(utils, "uuid").returns("entity_id")
-				game:spawn(entityMock)
+		it("should fail if the entity was not spawned", function()
+			stub(entityMock, "isSpawned").returns(false)
+			assert.has.errors(function()
+				game:destroy(entityMock)
 			end)
+		end)
 
-			after_each(function()
-				---@diagnostic disable-next-line: undefined-field
-				utils.uuid:revert()
-			end)
-
+		describe("entities table", function()
 			it("should not remove the entity from the entities table if not called", function()
 				assert.are.equal(entityMock, game.entities["entity_id"])
 			end)
@@ -124,28 +120,51 @@ describe("#Game", function()
 				game:destroy("entity_id")
 				assert.is_nil(game.entities["entity_id"])
 			end)
+		end)
 
-			it("if it has a parent, it should remove itself from it's parent children", function()
-				stub(entityMock, "getParent").returns(parentEntityMock)
-				stub(parentEntityMock, "removeChild")
-				game:destroy(entityMock)
-				assert.stub(parentEntityMock.removeChild).was_called_with(parentEntityMock, entityMock)
+		it("if it has a parent, it should remove itself from it's parent children", function()
+			local parentEntityMock = Entity:new()
+			stub(entityMock, "getParent").returns(parentEntityMock)
+			stub(parentEntityMock, "removeChild")
+			game:destroy(entityMock)
+			assert.stub(parentEntityMock.removeChild).was_called_with(parentEntityMock, entityMock)
+		end)
+
+		describe("with children", function()
+			local childEntityMock1
+			local childEntityMock2
+
+			before_each(function()
+				childEntityMock1 = Entity:new()
+				childEntityMock2 = Entity:new()
 			end)
 
 			it("should also destroy the entity's children", function()
-				stub(entityMock, "getChildren").returns({ childEntityMock1, childEntityMock2 })
+				entityMock:addChild(childEntityMock1)
+				entityMock:addChild(childEntityMock2)
+
 				spy.on(game, "destroy")
+
 				game:destroy(entityMock)
+
 				assert.spy(game.destroy).was_called_with(match.is_ref(game), match.is_ref(entityMock))
 				assert.spy(game.destroy).was_called_with(match.is_ref(game), match.is_ref(childEntityMock1))
 				assert.spy(game.destroy).was_called_with(match.is_ref(game), match.is_ref(childEntityMock2))
 				assert.spy(game.destroy).was_called(3)
 			end)
-		end)
 
-		it("should not fail if the entity is not present", function()
-			assert.has_no.errors(function()
+			it("should destroy its children's children", function()
+				entityMock:addChild(childEntityMock1)
+				childEntityMock1:addChild(childEntityMock2)
+
+				spy.on(game, "destroy")
+
 				game:destroy(entityMock)
+
+				assert.spy(game.destroy).was_called_with(match.is_ref(game), match.is_ref(entityMock))
+				assert.spy(game.destroy).was_called_with(match.is_ref(game), match.is_ref(childEntityMock1))
+				assert.spy(game.destroy).was_called_with(match.is_ref(game), match.is_ref(childEntityMock2))
+				assert.spy(game.destroy).was_called(3)
 			end)
 		end)
 
