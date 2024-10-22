@@ -7,7 +7,7 @@ local class = require("oopsie").class
 --- @field private drawLayer number
 local Behaviour = class("Behaviour")
 
---- @param requirements Behaviour[]
+--- @param requirements string[]
 function Behaviour:initialize(requirements)
 	self.requirements = requirements
 end
