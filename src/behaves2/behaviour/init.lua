@@ -2,7 +2,7 @@ local class = require("oopsie").class
 
 --- @class Behaviour : Base
 --- @field protected entity Entity
---- @field private requirements Behaviour[]
+--- @field private requirements string[]
 --- @field private drawOrder number
 --- @field private drawLayer number
 local Behaviour = class("Behaviour")
@@ -12,7 +12,7 @@ function Behaviour:initialize(requirements)
 	self.requirements = requirements
 end
 
---- @return Behaviour[]
+--- @return string[]
 function Behaviour:getRequirements()
 	if self.requirements == nil then
 		self.requirements = {}
@@ -26,7 +26,7 @@ function Behaviour:_checkRequirements()
 			error(
 				string.format(
 					"Entity is missing a behaviour of class: %s, required by the behaviour: %s",
-					requirement.className,
+					requirement,
 					self.className
 				)
 			)

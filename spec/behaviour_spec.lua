@@ -87,11 +87,8 @@ describe("#Behaviour", function()
 	end)
 
 	describe("#_checkRequirements", function()
-		local OtherBehaviourCls
-
 		before_each(function()
-			OtherBehaviourCls = extends("TestRequirement", Behaviour)
-			behaviourMock = Behaviour:new({ OtherBehaviourCls })
+			behaviourMock = Behaviour:new({ "TestRequirement" })
 			behaviourMock:_setEntity(entityMock)
 		end)
 
