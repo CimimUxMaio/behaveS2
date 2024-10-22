@@ -64,7 +64,7 @@ end
 --- @param behaviour Behaviour
 --- @return Entity
 function Entity:addBehaviour(behaviour)
-	local cls = behaviour:getClass()
+	local cls = behaviour.className
 	if self:hasBehaviour(cls) then
 		error(string.format("Entity already contains a behaviour of type %s", behaviour.className))
 	end
@@ -79,7 +79,7 @@ function Entity:addBehaviour(behaviour)
 	return self
 end
 
---- @param cls Behaviour
+--- @param cls string
 function Entity:removeBehaviour(cls)
 	local behaviour = self.behaviours[cls]
 	self.behaviours[cls] = nil
@@ -90,7 +90,7 @@ function Entity:removeBehaviour(cls)
 end
 
 --- @generic T : Behaviour
---- @param cls T
+--- @param cls string
 --- @return T
 function Entity:getBehaviour(cls)
 	return self.behaviours[cls]
@@ -124,8 +124,7 @@ function Entity:getChildren()
 	return self.children
 end
 
---- @generic T : Behaviour
---- @param cls T
+--- @param cls string
 --- @return boolean
 function Entity:hasBehaviour(cls)
 	return self:getBehaviour(cls) ~= nil
