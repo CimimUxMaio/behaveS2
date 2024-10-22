@@ -7,6 +7,7 @@ local PhysicsBody = extends("PhysicsBody", Behaviour)
 
 --- @param fixture love.Fixture
 function PhysicsBody:initialize(fixture)
+	Behaviour.initialize(self)
 	self.fixture = fixture
 end
 

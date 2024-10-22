@@ -7,16 +7,19 @@ local class = require("oopsie").class
 --- @field private drawLayer number
 local Behaviour = class("Behaviour")
 
---- @param requirements string[]
+--- @param requirements string[]? Defaults to {}
 function Behaviour:initialize(requirements)
+	if requirements == nil then
+		requirements = {}
+	end
+
 	self.requirements = requirements
+	self.drawLayer = math.huge
+	self.drawOrder = math.huge
 end
 
 --- @return string[]
 function Behaviour:getRequirements()
-	if self.requirements == nil then
-		self.requirements = {}
-	end
 	return self.requirements
 end
 
@@ -36,9 +39,6 @@ end
 
 --- @return number
 function Behaviour:getDrawOrder()
-	if self.drawOrder == nil then
-		self.drawOrder = math.huge
-	end
 	return self.drawOrder
 end
 
@@ -54,9 +54,6 @@ end
 
 --- @return number
 function Behaviour:getDrawLayer()
-	if self.drawLayer == nil then
-		self.drawLayer = math.huge
-	end
 	return self.drawLayer
 end
 
