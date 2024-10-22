@@ -2,9 +2,9 @@ local class = require("oopsie").class
 
 --- @class Entity : Base
 --- @field protected model table
+--- @field protected parent? Entity
 --- @field private id string
 --- @field private game Game
---- @field private parent? Entity
 --- @field private children Entity[]
 --- @field private behaviours Behaviour[]
 --- @field private destroyed boolean
