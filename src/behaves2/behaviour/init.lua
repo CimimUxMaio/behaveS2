@@ -1,15 +1,10 @@
 local class = require("oopsie").class
 
----@class DeferredTask
----@field task function
----@field args any[]
-
 --- @class Behaviour : Base
 --- @field protected entity Entity
 --- @field private requirements string[]
 --- @field private drawOrder number
 --- @field private drawLayer number
---- @field private deferredTasks DeferredTask[]
 local Behaviour = class("Behaviour")
 
 --- @param requirements string[]? Defaults to {}
@@ -21,14 +16,6 @@ function Behaviour:initialize(requirements)
 	self.requirements = requirements
 	self.drawLayer = math.huge
 	self.drawOrder = math.huge
-	self.deferredTasks = {}
-
-	--- Execute deferred tasks before updating
-	local userDefinedUpdate = self.onUpdate or function() end
-	self.onUpdate = function(s, dt)
-		self:executeDeferredTasks()
-		userDefinedUpdate(s, dt)
-	end
 end
 
 --- @return string[]
@@ -116,21 +103,6 @@ function Behaviour:handledEvents()
 	traverseClass(self)
 
 	return events
-end
-
-function Behaviour:defer(task, ...)
-	table.insert(self.deferredTasks, {
-		task = task,
-		args = { ... },
-	})
-end
-
----@private
-function Behaviour:executeDeferredTasks()
-	while #self.deferredTasks ~= 0 do
-		local task = table.remove(self.deferredTasks)
-		task.task(unpack(task.args))
-	end
 end
 
 return Behaviour

@@ -4,16 +4,22 @@ local Logger = require("behaves2.utils.logging")
 
 local logger = Logger:new("Game")
 
+---@class DeferredTask
+---@field task function
+---@field args any[]
+
 --- @class Game : Base
 --- @field private entities {[string]: Entity}
 --- @field private subscriptions {[string]: {[string]: Behaviour[]}}
 --- @field private destroyed {[string]: boolean}
+--- @field private deferredTasks DeferredTask[]
 local Game = class("Game")
 
 function Game:initialize()
 	self.entities = {}
 	self.subscriptions = {}
 	self.destroyed = {}
+	self.deferredTasks = {}
 end
 
 --- @param entity Entity
@@ -162,6 +168,9 @@ end
 
 --- @param dt number
 function Game:update(dt)
+	--- Execute queued deferred tasks before next update
+	self:executeDeferredTasks()
+
 	self:broadcastEvent("update", dt)
 
 	local entityCount = 0
@@ -234,6 +243,23 @@ function Game:broadcastEvent(event, ...)
 
 		return all
 	end, ...)
+end
+
+---@param task fun()
+---@param ... any
+function Game:defer(task, ...)
+	table.insert(self.deferredTasks, {
+		task = task,
+		args = { ... },
+	})
+end
+
+---@private
+function Game:executeDeferredTasks()
+	while #self.deferredTasks ~= 0 do
+		local task = table.remove(self.deferredTasks)
+		task.task(unpack(task.args))
+	end
 end
 
 return Game
