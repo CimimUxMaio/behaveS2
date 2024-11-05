@@ -6,7 +6,7 @@ local class = require("oopsie").class
 --- @field private id string
 --- @field private game Game
 --- @field private children Entity[]
---- @field private behaviours Behaviour[]
+--- @field private behaviours {[string]: Behaviour}
 --- @field private destroyed boolean
 --- @field private drawLayer number
 --- @field private drawOrder number
@@ -132,7 +132,12 @@ end
 
 --- @return Behaviour[]
 function Entity:getBehaviours()
-	return self.behaviours
+	local list = {}
+	for _, behaviour in pairs(self.behaviours) do
+		table.insert(list, behaviour)
+	end
+
+	return list
 end
 
 --- @param event string

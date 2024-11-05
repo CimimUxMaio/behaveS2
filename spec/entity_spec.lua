@@ -57,7 +57,26 @@ describe("#Entity", function()
 		assert.is_true(entity:isDestroyed())
 	end)
 
-	describe("#addBehaviour #getBehaviour", function()
+	describe("#getBehaviour", function()
+		it("should return nil if the entity does not have the behaviour", function()
+			assert.is_nil(entity:getBehaviour("Unknown"))
+		end)
+
+		it("should return the added behaviours of the given class", function()
+			entity:addBehaviour(behaviourMock)
+			assert.are.equal(behaviourMock, entity:getBehaviour("Behaviour"))
+		end)
+	end)
+
+	it("#getBehaviours should return all added behaviours as a list", function()
+		local CustomBehaviourCls = extends("CustomBehaviour", Behaviour)
+		local customBehaviourMock = CustomBehaviourCls:new()
+		entity:addBehaviour(behaviourMock)
+		entity:addBehaviour(customBehaviourMock)
+		assert.are.same({ behaviourMock, customBehaviourMock }, entity:getBehaviours())
+	end)
+
+	describe("#addBehaviour", function()
 		local CustomBehaviourCls
 		local customBehaviourMock
 
@@ -66,18 +85,9 @@ describe("#Entity", function()
 			customBehaviourMock = CustomBehaviourCls:new()
 		end)
 
-		it("should return nil if the entity does not have the behaviour", function()
-			assert.is_nil(entity:getBehaviour("Behaviour"))
-		end)
-
 		it("should add behaviour", function()
 			entity:addBehaviour(behaviourMock)
 			assert.are.equal(behaviourMock, entity:getBehaviour("Behaviour"))
-		end)
-
-		it("should return nil if the added behaviour is not of the given class", function()
-			entity:addBehaviour(behaviourMock)
-			assert.is_nil(entity:getBehaviour(CustomBehaviourCls))
 		end)
 
 		it("should allow to add multiple behaviours of different types", function()
@@ -111,7 +121,7 @@ describe("#Entity", function()
 			assert.stub(gameMock._unsubscribe).was_not_called()
 		end)
 
-		it("should return the same entity", function()
+		it("should return itself", function()
 			assert.are.equal(entity, entity:addBehaviour(behaviourMock))
 		end)
 	end)
