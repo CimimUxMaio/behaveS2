@@ -1,8 +1,14 @@
 local class = require("oopsie").class
 
+--- @alias PauseMode
+--- | "do-nothing"
+--- | "draw-only"
+--- | "do-all"
+
 --- @class Entity : Base
 --- @field protected model table
 --- @field protected parent? Entity
+--- @field protected paused boolean
 --- @field private id string
 --- @field private game Game
 --- @field private children Entity[]
@@ -10,6 +16,7 @@ local class = require("oopsie").class
 --- @field private destroyed boolean
 --- @field private drawLayer number
 --- @field private drawOrder number
+--- @field private pauseMode PauseMode
 local Entity = class("Entity")
 
 --- @param model table?
@@ -17,9 +24,11 @@ function Entity:initialize(model)
 	self.children = {}
 	self.behaviours = {}
 	self.destroyed = false
+	self.paused = false
 	self.drawOrder = math.huge
 	self.drawLayer = math.huge
 	self.model = model or {}
+	self.pauseMode = "do-nothing"
 end
 
 --- @param id string
@@ -37,17 +46,17 @@ function Entity:_setGame(game)
 	self.game = game
 end
 
----@return Game
+--- @return Game
 function Entity:getGame()
 	return self.game
 end
 
----@param parent Entity?
+--- @param parent Entity?
 function Entity:_setParent(parent)
 	self.parent = parent
 end
 
----@return Entity?
+--- @return Entity?
 function Entity:getParent()
 	return self.parent
 end
@@ -59,6 +68,55 @@ end
 --- @return boolean
 function Entity:isDestroyed()
 	return self.destroyed
+end
+
+--- @param mode PauseMode
+function Entity:setPauseMode(mode)
+	if mode ~= "do-nothing" and mode ~= "draw-only" and mode ~= "do-all" then
+		error(string.format("Invalid pause mode: %s", mode))
+	end
+	self.pauseMode = mode
+end
+
+--- @return PauseMode
+function Entity:getPauseMode()
+	return self.pauseMode
+end
+
+--- @return boolean
+function Entity:isUpdateable()
+	if self:isDestroyed() then
+		return false
+	end
+
+	if not self:isPaused() then
+		return true
+	end
+
+	return self.pauseMode == "do-all"
+end
+
+--- @return boolean
+function Entity:isDrawable()
+	if self:isDestroyed() then
+		return false
+	end
+
+	if not self:isPaused() then
+		return true
+	end
+
+	return self.pauseMode == "do-all" or self.pauseMode == "draw-only"
+end
+
+--- @param paused boolean
+function Entity:setPaused(paused)
+	self.paused = paused
+end
+
+--- @return boolean
+function Entity:isPaused()
+	return self.paused
 end
 
 --- @param behaviour Behaviour
@@ -96,7 +154,7 @@ function Entity:getBehaviour(cls)
 	return self.behaviours[cls]
 end
 
----@param child Entity
+--- @param child Entity
 function Entity:addChild(child)
 	table.insert(self.children, child)
 	child:_setParent(self)
@@ -105,10 +163,12 @@ function Entity:addChild(child)
 		self.game:spawn(child)
 	end
 
+	child:setPaused(self:isPaused())
+
 	return self
 end
 
----@param child Entity
+--- @param child Entity
 function Entity:removeChild(child)
 	for i, c in ipairs(self.children) do
 		if c == child then
@@ -119,7 +179,7 @@ function Entity:removeChild(child)
 	end
 end
 
----@return Entity[]
+--- @return Entity[]
 function Entity:getChildren()
 	return self.children
 end

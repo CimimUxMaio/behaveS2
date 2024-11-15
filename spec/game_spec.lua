@@ -241,42 +241,104 @@ describe("#Game", function()
 	end)
 
 	describe("#update", function()
-		it("should call #broadcastEvent with the update event and corresponding delta time", function()
-			stub(game, "broadcastEvent")
+		local entityMock2
+		local behaviourMock2
+
+		before_each(function()
+			entityMock2 = Entity:new()
+			stub(entityMock2, "getId").returns("entity_id2")
+
+			behaviourMock2 = Behaviour:new()
+			stub(behaviourMock2, "getEntity").returns(entityMock2)
+			stub(behaviourMock2, "handleEvent")
+		end)
+
+		it("should execute deferred tasks before the update", function()
+			stub(game, "executeDeferredTasks")
+			game:update(1)
+			assert.stub(game.executeDeferredTasks).was_called(1)
+		end)
+
+		it("should raise the 'update' event for all updateable subscribers", function()
+			stub(entityMock, "isUpdateable").returns(true)
+			stub(entityMock2, "isUpdateable").returns(true)
+
+			game.subscriptions["update"] = { ["entity_id"] = { behaviourMock }, ["entity_id2"] = { behaviourMock2 } }
 			game:update(22)
-			assert.stub(game.broadcastEvent).was_called_with(match.is_ref(game), "update", 22)
+
+			assert.stub(behaviourMock.handleEvent).was_called_with(match.is_ref(behaviourMock), "update", 22)
+			assert.stub(behaviourMock2.handleEvent).was_called_with(match.is_ref(behaviourMock2), "update", 22)
+		end)
+
+		it("should not raise the 'update' event for non-updateable subscribers", function()
+			stub(entityMock, "isUpdateable").returns(false)
+			stub(entityMock2, "isUpdateable").returns(true)
+
+			game.subscriptions["update"] = { ["entity_id"] = { behaviourMock }, ["entity_id2"] = { behaviourMock2 } }
+			game:update(2)
+
+			assert.stub(behaviourMock.handleEvent).was_not_called()
+			assert.stub(behaviourMock2.handleEvent).was_called_with(match.is_ref(behaviourMock2), "update", 2)
+		end)
+
+		it("should not raise the 'update' event for destroyed subscribers", function()
+			stub(entityMock, "isUpdateable").returns(true)
+			stub(entityMock, "isDestroyed").returns(true)
+			stub(entityMock2, "isUpdateable").returns(true)
+
+			game.subscriptions["update"] = { ["entity_id"] = { behaviourMock }, ["entity_id2"] = { behaviourMock2 } }
+			game:update(2)
+
+			assert.stub(behaviourMock.handleEvent).was_not_called()
+			assert.stub(behaviourMock2.handleEvent).was_called_with(match.is_ref(behaviourMock2), "update", 2)
 		end)
 	end)
 
 	describe("#draw", function()
-		local drawBehaviourMock
+		local entityMock2
+		local behaviourMock2
 
 		before_each(function()
-			drawBehaviourMock = Behaviour:new()
-			stub(drawBehaviourMock, "getEntity").returns(entityMock)
-			stub(drawBehaviourMock, "handleEvent")
+			entityMock2 = Entity:new()
+			stub(entityMock2, "getId").returns("entity_id2")
+
+			behaviourMock2 = Behaviour:new()
+			stub(behaviourMock2, "getEntity").returns(entityMock2)
+			stub(behaviourMock2, "handleEvent")
 		end)
 
-		it("should raise the draw event for all draw subscribers", function()
-			game.subscriptions["draw"] = { ["entity_id"] = { behaviourMock, drawBehaviourMock } }
+		it("should raise the 'draw' event for all drawable subscribers", function()
+			stub(entityMock, "isDrawable").returns(true)
+			stub(entityMock2, "isDrawable").returns(true)
+
+			game.subscriptions["draw"] = { ["entity_id"] = { behaviourMock }, ["entity_id2"] = { behaviourMock2 } }
 			game:draw()
-			assert.stub(behaviourMock.handleEvent).was_called()
-			assert.stub(drawBehaviourMock.handleEvent).was_called()
+
 			assert.stub(behaviourMock.handleEvent).was_called_with(match.is_ref(behaviourMock), "draw")
-			assert.stub(drawBehaviourMock.handleEvent).was_called_with(match.is_ref(drawBehaviourMock), "draw")
+			assert.stub(behaviourMock2.handleEvent).was_called_with(match.is_ref(behaviourMock2), "draw")
 		end)
 
-		it("should not raise the draw event for non-draw subscribers", function()
-			game.subscriptions["otherEvent"] = { ["entity_id"] = { behaviourMock } }
+		it("should not raise the 'draw' event for non-drawable subscribers", function()
+			stub(entityMock, "isDrawable").returns(true)
+			stub(entityMock2, "isDrawable").returns(false)
+
+			game.subscriptions["draw"] = { ["entity_id"] = { behaviourMock }, ["entity_id2"] = { behaviourMock2 } }
 			game:draw()
-			assert.stub(behaviourMock.handleEvent).was_not_called()
+
+			assert.stub(behaviourMock.handleEvent).was_called_with(match.is_ref(behaviourMock), "draw")
+			assert.stub(behaviourMock2.handleEvent).was_not_called()
 		end)
 
-		it("shold not raise the draw event for destroyed entities", function()
-			game.subscriptions["draw"] = { ["entity_id"] = { drawBehaviourMock } }
-			stub(entityMock, "isDestroyed").returns(true)
+		it("should not raise the 'draw' event for destroyed subscribers", function()
+			stub(entityMock, "isDrawable").returns(true)
+			stub(entityMock2, "isDrawable").returns(true)
+			stub(entityMock2, "isDestroyed").returns(true)
+
+			game.subscriptions["draw"] = { ["entity_id"] = { behaviourMock }, ["entity_id2"] = { behaviourMock2 } }
 			game:draw()
-			assert.stub(drawBehaviourMock.handleEvent).was_not_called()
+
+			assert.stub(behaviourMock.handleEvent).was_called_with(match.is_ref(behaviourMock), "draw")
+			assert.stub(behaviourMock2.handleEvent).was_not_called()
 		end)
 	end)
 

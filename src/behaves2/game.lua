@@ -171,7 +171,12 @@ function Game:update(dt)
 	--- Execute queued deferred tasks before next update
 	self:executeDeferredTasks()
 
-	self:broadcastEvent("update", dt)
+	for _, behaviour in ipairs(self:getActiveSubscribers("update")) do
+		-- Only update entities that are updateable
+		if behaviour:getEntity():isUpdateable() then
+			behaviour:handleEvent("update", dt)
+		end
+	end
 
 	local entityCount = 0
 	for _ in pairs(self.entities) do
@@ -187,45 +192,35 @@ function Game:update(dt)
 end
 
 function Game:draw()
-	self:raiseEvent("draw", function(subscribers)
-		local all = {}
-		for _, behaviours in pairs(subscribers) do
-			for _, behaviour in ipairs(behaviours) do
-				table.insert(all, behaviour)
-			end
-		end
+	local target = self:getActiveSubscribers("draw")
+	self.sortByDrawPriority(target)
 
-		table.sort(all, function(a, b)
-			local entityA, entityB = a:getEntity(), b:getEntity()
-			local priorityA = { entityA:getDrawOrder(), entityA:getDrawLayer(), a:getDrawOrder(), b:getDrawLayer() }
-			local priorityB = { entityB:getDrawOrder(), entityB:getDrawLayer(), b:getDrawOrder(), b:getDrawLayer() }
-
-			for i = 1, 4 do
-				if priorityA[i] > priorityB[i] then
-					return true
-				elseif priorityA[i] < priorityB[i] then
-					return false
-				end
-			end
-
-			return false
-		end)
-
-		return all
-	end)
-end
-
---- @private
---- @param event string
---- @param filter fun(subscribers:{[string]: Behaviour[]}): Behaviour[]
---- @param ... any
-function Game:raiseEvent(event, filter, ...)
-	local subscribers = self.subscriptions[event] or {}
-	for _, behaviour in ipairs(filter(subscribers)) do
-		if not behaviour:getEntity():isDestroyed() then
-			behaviour:handleEvent(event, ...)
+	for _, behaviour in ipairs(target) do
+		--- Only draw entities that are drawable
+		if behaviour:getEntity():isDrawable() then
+			behaviour:handleEvent("draw")
 		end
 	end
+end
+
+---@private
+---@param behaviours Behaviour[]
+function Game.sortByDrawPriority(behaviours)
+	table.sort(behaviours, function(a, b)
+		local entityA, entityB = a:getEntity(), b:getEntity()
+		local priorityA = { entityA:getDrawOrder(), entityA:getDrawLayer(), a:getDrawOrder(), b:getDrawLayer() }
+		local priorityB = { entityB:getDrawOrder(), entityB:getDrawLayer(), b:getDrawOrder(), b:getDrawLayer() }
+
+		for i = 1, 4 do
+			if priorityA[i] > priorityB[i] then
+				return true
+			elseif priorityA[i] < priorityB[i] then
+				return false
+			end
+		end
+
+		return false
+	end)
 end
 
 --- @param event string
@@ -233,16 +228,25 @@ end
 function Game:broadcastEvent(event, ...)
 	logger:debug(string.format("Event broadcast - Event: %s", event))
 
-	self:raiseEvent(event, function(subscribers)
-		local all = {}
-		for _, behaviours in pairs(subscribers) do
-			for _, behaviour in ipairs(behaviours) do
-				table.insert(all, behaviour)
+	for _, behaviour in ipairs(self:getActiveSubscribers(event)) do
+		behaviour:handleEvent(event, ...)
+	end
+end
+
+--- @private
+--- @param event string
+--- @return Behaviour[]
+function Game:getActiveSubscribers(event)
+	local subscribers = {}
+	for _, behaviours in pairs(self.subscriptions[event] or {}) do
+		for _, behaviour in ipairs(behaviours) do
+			if not behaviour:getEntity():isDestroyed() then
+				table.insert(subscribers, behaviour)
 			end
 		end
+	end
 
-		return all
-	end, ...)
+	return subscribers
 end
 
 ---@param task fun()
