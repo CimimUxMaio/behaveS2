@@ -260,8 +260,8 @@ describe("#Game", function()
 		end)
 
 		it("should raise the 'update' event for all updateable subscribers", function()
-			stub(entityMock, "isUpdateable").returns(true)
-			stub(entityMock2, "isUpdateable").returns(true)
+			stub(behaviourMock, "isUpdateable").returns(true)
+			stub(behaviourMock2, "isUpdateable").returns(true)
 
 			game.subscriptions["update"] = { ["entity_id"] = { behaviourMock }, ["entity_id2"] = { behaviourMock2 } }
 			game:update(22)
@@ -271,8 +271,8 @@ describe("#Game", function()
 		end)
 
 		it("should not raise the 'update' event for non-updateable subscribers", function()
-			stub(entityMock, "isUpdateable").returns(false)
-			stub(entityMock2, "isUpdateable").returns(true)
+			stub(behaviourMock, "isUpdateable").returns(false)
+			stub(behaviourMock2, "isUpdateable").returns(true)
 
 			game.subscriptions["update"] = { ["entity_id"] = { behaviourMock }, ["entity_id2"] = { behaviourMock2 } }
 			game:update(2)
@@ -282,9 +282,9 @@ describe("#Game", function()
 		end)
 
 		it("should not raise the 'update' event for destroyed subscribers", function()
-			stub(entityMock, "isUpdateable").returns(true)
 			stub(entityMock, "isDestroyed").returns(true)
-			stub(entityMock2, "isUpdateable").returns(true)
+			stub(behaviourMock, "isUpdateable").returns(true)
+			stub(behaviourMock2, "isUpdateable").returns(true)
 
 			game.subscriptions["update"] = { ["entity_id"] = { behaviourMock }, ["entity_id2"] = { behaviourMock2 } }
 			game:update(2)
@@ -308,8 +308,8 @@ describe("#Game", function()
 		end)
 
 		it("should raise the 'draw' event for all drawable subscribers", function()
-			stub(entityMock, "isDrawable").returns(true)
-			stub(entityMock2, "isDrawable").returns(true)
+			stub(behaviourMock, "isDrawable").returns(true)
+			stub(behaviourMock2, "isDrawable").returns(true)
 
 			game.subscriptions["draw"] = { ["entity_id"] = { behaviourMock }, ["entity_id2"] = { behaviourMock2 } }
 			game:draw()
@@ -319,8 +319,8 @@ describe("#Game", function()
 		end)
 
 		it("should not raise the 'draw' event for non-drawable subscribers", function()
-			stub(entityMock, "isDrawable").returns(true)
-			stub(entityMock2, "isDrawable").returns(false)
+			stub(behaviourMock, "isDrawable").returns(true)
+			stub(behaviourMock2, "isDrawable").returns(false)
 
 			game.subscriptions["draw"] = { ["entity_id"] = { behaviourMock }, ["entity_id2"] = { behaviourMock2 } }
 			game:draw()
@@ -330,9 +330,9 @@ describe("#Game", function()
 		end)
 
 		it("should not raise the 'draw' event for destroyed subscribers", function()
-			stub(entityMock, "isDrawable").returns(true)
-			stub(entityMock2, "isDrawable").returns(true)
 			stub(entityMock2, "isDestroyed").returns(true)
+			stub(behaviourMock, "isDrawable").returns(true)
+			stub(behaviourMock2, "isDrawable").returns(true)
 
 			game.subscriptions["draw"] = { ["entity_id"] = { behaviourMock }, ["entity_id2"] = { behaviourMock2 } }
 			game:draw()

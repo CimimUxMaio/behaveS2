@@ -173,7 +173,7 @@ function Game:update(dt)
 
 	for _, behaviour in ipairs(self:getActiveSubscribers("update")) do
 		-- Only update entities that are updateable
-		if behaviour:getEntity():isUpdateable() then
+		if behaviour:isUpdateable() then
 			behaviour:handleEvent("update", dt)
 		end
 	end
@@ -197,7 +197,7 @@ function Game:draw()
 
 	for _, behaviour in ipairs(target) do
 		--- Only draw entities that are drawable
-		if behaviour:getEntity():isDrawable() then
+		if behaviour:isDrawable() then
 			behaviour:handleEvent("draw")
 		end
 	end
