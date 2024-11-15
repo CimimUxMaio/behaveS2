@@ -11,7 +11,6 @@ local class = require("oopsie").class
 --- @field private destroyed boolean
 --- @field private drawLayer number
 --- @field private drawOrder number
---- @field private pauseMode PauseMode
 local Entity = class("Entity")
 
 --- @param model table?
@@ -23,7 +22,6 @@ function Entity:initialize(model)
 	self.drawOrder = math.huge
 	self.drawLayer = math.huge
 	self.model = model or {}
-	self.pauseMode = "do-nothing"
 end
 
 --- @param id string
@@ -63,45 +61,6 @@ end
 --- @return boolean
 function Entity:isDestroyed()
 	return self.destroyed
-end
-
---- @param mode PauseMode
-function Entity:setPauseMode(mode)
-	if mode ~= "do-nothing" and mode ~= "draw-only" and mode ~= "do-all" then
-		error(string.format("Invalid pause mode: %s", mode))
-	end
-	self.pauseMode = mode
-end
-
---- @return PauseMode
-function Entity:getPauseMode()
-	return self.pauseMode
-end
-
---- @return boolean
-function Entity:isUpdateable()
-	if self:isDestroyed() then
-		return false
-	end
-
-	if not self:isPaused() then
-		return true
-	end
-
-	return self.pauseMode == "do-all"
-end
-
---- @return boolean
-function Entity:isDrawable()
-	if self:isDestroyed() then
-		return false
-	end
-
-	if not self:isPaused() then
-		return true
-	end
-
-	return self.pauseMode == "do-all" or self.pauseMode == "draw-only"
 end
 
 --- @param paused boolean
