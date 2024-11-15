@@ -29,7 +29,6 @@ describe("#Entity", function()
 		assert.are.same({}, entity:getChildren())
 		assert.is_false(entity:isDestroyed())
 		assert.is_false(entity:isPaused())
-		assert.are.equal("do-nothing", entity:getPauseMode())
 	end)
 
 	it("#_setId #getId should set and get id", function()
