@@ -112,6 +112,10 @@ end
 --- @param paused boolean
 function Entity:setPaused(paused)
 	self.paused = paused
+
+	for _, child in ipairs(self.children) do
+		child:setPaused(paused)
+	end
 end
 
 --- @return boolean

@@ -52,9 +52,21 @@ describe("#Entity", function()
 		assert.is_true(entity:isDestroyed())
 	end)
 
-	it("#setPaused #isPaused should set paused state", function()
-		entity:setPaused(true)
-		assert.is_true(entity:isPaused())
+	describe("#setPaused", function()
+		it("#isPaused should set the entitie's paused state", function()
+			entity:setPaused(true)
+			assert.is_true(entity:isPaused())
+		end)
+
+		it("should also set the entitie's children's paused state", function()
+			entity:addChild(otherEntity)
+
+			entity:setPaused(true)
+			assert.is_true(otherEntity:isPaused())
+
+			entity:setPaused(false)
+			assert.is_false(otherEntity:isPaused())
+		end)
 	end)
 
 	describe("#setPauseMode", function()
