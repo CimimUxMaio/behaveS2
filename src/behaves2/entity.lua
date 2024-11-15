@@ -1,10 +1,5 @@
 local class = require("oopsie").class
 
---- @alias PauseMode
---- | "do-nothing"
---- | "draw-only"
---- | "do-all"
-
 --- @class Entity : Base
 --- @field protected model table
 --- @field protected parent? Entity

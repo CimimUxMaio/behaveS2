@@ -69,83 +69,11 @@ describe("#Entity", function()
 		end)
 	end)
 
-	describe("#setPauseMode", function()
-		it("#getPauseMode should set and get pause mode", function()
-			entity:setPauseMode("do-all")
-			assert.are.equal("do-all", entity:getPauseMode())
-		end)
-
-		it("should error if the given mode is not a valid pause mode", function()
-			assert.has.errors(function()
-				--- @diagnostic disable-next-line: param-type-mismatch
-				entity:setPauseMode("invalid-mode")
-			end)
-		end)
-	end)
-
 	it("multiple #_setDestroyed should set destroyed state anyways", function()
 		entity:_setDestroyed()
 		entity:_setDestroyed()
 		entity:_setDestroyed()
 		assert.is_true(entity:isDestroyed())
-	end)
-
-	describe("#isUpdateable", function()
-		it("should return false if the entity is destroyed", function()
-			entity:_setDestroyed()
-			assert.is_false(entity:isUpdateable())
-		end)
-
-		it("should return true if the entity is not paused", function()
-			assert.is_true(entity:isUpdateable())
-		end)
-
-		describe("if the entity is paused", function()
-			it("it should return false if the pause mode is either 'do-nothing' or 'draw-only", function()
-				entity:setPaused(true)
-
-				entity:setPauseMode("do-nothing")
-				assert.is_false(entity:isUpdateable())
-
-				entity:setPauseMode("draw-only")
-				assert.is_false(entity:isUpdateable())
-			end)
-
-			it("it should return true if the pause mode is 'do-all'", function()
-				entity:setPaused(true)
-				entity:setPauseMode("do-all")
-				assert.is_true(entity:isUpdateable())
-			end)
-		end)
-	end)
-
-	describe("#isDrawable", function()
-		it("should return false if the entity is destroyed", function()
-			entity:_setDestroyed()
-			assert.is_false(entity:isDrawable())
-		end)
-
-		it("should return true if the entity is not paused", function()
-			assert.is_true(entity:isDrawable())
-		end)
-
-		describe("if the entity is paused", function()
-			it("it should return false if the pause mode is 'do-nothing'", function()
-				entity:setPaused(true)
-				entity:setPauseMode("do-nothing")
-				assert.is_false(entity:isDrawable())
-			end)
-
-			it("it should return true if the pause mode is either 'do-all' or 'draw-only'", function()
-				entity:setPaused(true)
-
-				entity:setPauseMode("do-all")
-				assert.is_true(entity:isDrawable())
-
-				entity:setPauseMode("draw-only")
-				assert.is_true(entity:isDrawable())
-			end)
-		end)
 	end)
 
 	describe("#getBehaviour", function()

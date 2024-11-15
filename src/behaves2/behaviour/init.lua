@@ -1,10 +1,16 @@
 local class = require("oopsie").class
 
+--- @alias PauseMode
+--- | "do-nothing"
+--- | "draw-only"
+--- | "do-all"
+
 --- @class Behaviour : Base
 --- @field protected entity Entity
 --- @field private requirements string[]
 --- @field private drawOrder number
 --- @field private drawLayer number
+--- @field private pauseMode PauseMode
 local Behaviour = class("Behaviour")
 
 --- @param requirements string[]? Defaults to {}
@@ -16,6 +22,7 @@ function Behaviour:initialize(requirements)
 	self.requirements = requirements
 	self.drawLayer = math.huge
 	self.drawOrder = math.huge
+	self.pauseMode = "do-nothing"
 end
 
 --- @return string[]
@@ -103,6 +110,37 @@ function Behaviour:handledEvents()
 	traverseClass(self)
 
 	return events
+end
+
+--- @param mode PauseMode
+function Behaviour:setPauseMode(mode)
+	if mode ~= "do-nothing" and mode ~= "draw-only" and mode ~= "do-all" then
+		error(string.format("Invalid pause mode: %s", mode))
+	end
+	self.pauseMode = mode
+end
+
+--- @return PauseMode
+function Behaviour:getPauseMode()
+	return self.pauseMode
+end
+
+--- @return boolean
+function Behaviour:isUpdateable()
+	if not self.entity:isPaused() then
+		return true
+	end
+
+	return self.pauseMode == "do-all"
+end
+
+--- @return boolean
+function Behaviour:isDrawable()
+	if not self.entity:isPaused() then
+		return true
+	end
+
+	return self.pauseMode == "do-all" or self.pauseMode == "draw-only"
 end
 
 return Behaviour
