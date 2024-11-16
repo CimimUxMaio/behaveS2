@@ -194,7 +194,8 @@ end
 function Game:draw()
 	local target = self:getActiveSubscribers("draw")
 	table.sort(target, function(a, b)
-		return a:getDrawLayer() < b:getDrawLayer()
+		-- Lower draw layers are drawn last.
+		return a:getDrawLayer() > b:getDrawLayer()
 	end)
 
 	for _, behaviour in ipairs(target) do
