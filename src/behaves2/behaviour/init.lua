@@ -8,7 +8,6 @@ local class = require("oopsie").class
 --- @class Behaviour : Base
 --- @field protected entity Entity
 --- @field private requirements string[]
---- @field private drawOrder number
 --- @field private drawLayer number
 --- @field private pauseMode PauseMode
 local Behaviour = class("Behaviour")
@@ -21,7 +20,6 @@ function Behaviour:initialize(requirements)
 
 	self.requirements = requirements
 	self.drawLayer = math.huge
-	self.drawOrder = math.huge
 	self.pauseMode = "do-nothing"
 end
 
@@ -42,16 +40,6 @@ function Behaviour:_checkRequirements()
 			)
 		end
 	end
-end
-
---- @return number
-function Behaviour:getDrawOrder()
-	return self.drawOrder
-end
-
---- @param drawOrder number
-function Behaviour:setDrawOrder(drawOrder)
-	self.drawOrder = drawOrder
 end
 
 --- @param drawLayer number

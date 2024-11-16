@@ -9,8 +9,6 @@ local class = require("oopsie").class
 --- @field private children Entity[]
 --- @field private behaviours {[string]: Behaviour}
 --- @field private destroyed boolean
---- @field private drawLayer number
---- @field private drawOrder number
 local Entity = class("Entity")
 
 --- @param model table?
@@ -19,8 +17,6 @@ function Entity:initialize(model)
 	self.behaviours = {}
 	self.destroyed = false
 	self.paused = false
-	self.drawOrder = math.huge
-	self.drawLayer = math.huge
 	self.model = model or {}
 end
 
@@ -169,26 +165,6 @@ end
 --- @return boolean
 function Entity:isSpawned()
 	return self.game ~= nil and not self:isDestroyed()
-end
-
---- @return number
-function Entity:getDrawLayer()
-	return self.drawLayer
-end
-
---- @return number
-function Entity:getDrawOrder()
-	return self.drawOrder
-end
----
---- @param drawLayer number
-function Entity:setDrawLayer(drawLayer)
-	self.drawLayer = drawLayer
-end
-
---- @param drawOrder number
-function Entity:setDrawOrder(drawOrder)
-	self.drawOrder = drawOrder
 end
 
 --- @retrun table

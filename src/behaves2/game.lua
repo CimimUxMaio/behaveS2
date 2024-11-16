@@ -193,7 +193,9 @@ end
 
 function Game:draw()
 	local target = self:getActiveSubscribers("draw")
-	self.sortByDrawPriority(target)
+	table.sort(target, function(a, b)
+		return a:getDrawLayer() < b:getDrawLayer()
+	end)
 
 	for _, behaviour in ipairs(target) do
 		--- Only draw entities that are drawable
@@ -201,26 +203,6 @@ function Game:draw()
 			behaviour:handleEvent("draw")
 		end
 	end
-end
-
----@private
----@param behaviours Behaviour[]
-function Game.sortByDrawPriority(behaviours)
-	table.sort(behaviours, function(a, b)
-		local entityA, entityB = a:getEntity(), b:getEntity()
-		local priorityA = { entityA:getDrawOrder(), entityA:getDrawLayer(), a:getDrawOrder(), b:getDrawLayer() }
-		local priorityB = { entityB:getDrawOrder(), entityB:getDrawLayer(), b:getDrawOrder(), b:getDrawLayer() }
-
-		for i = 1, 4 do
-			if priorityA[i] > priorityB[i] then
-				return true
-			elseif priorityA[i] < priorityB[i] then
-				return false
-			end
-		end
-
-		return false
-	end)
 end
 
 --- @param event string
