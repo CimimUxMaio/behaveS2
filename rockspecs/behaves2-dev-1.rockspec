@@ -26,6 +26,7 @@ build = {
 		["behaves2.utils.math"] = "src/behaves2/utils/math.lua",
 		["behaves2.utils.logger"] = "src/behaves2/utils/logger.lua",
 		["behaves2.utils.logging"] = "src/behaves2/utils/logging.lua",
+		["behaves2.utils.timedtrigger"] = "src/behaves2/utils/timedtrigger.lua",
 	},
 }
 test_dependencies = {
