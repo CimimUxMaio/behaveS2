@@ -1,12 +1,28 @@
 local class = require("oopsie").class
+local extends = require("oopsie").extends
 local utils = require("behaves2.utils.math")
 local Logger = require("behaves2.utils.logging")
+local TimedTrigger = require("behaves2.utils.timedtrigger")
 
 local logger = Logger:new("Game")
 
----@class DeferredTask
----@field task function
----@field args any[]
+---@class DeferredTask : TimedTrigger
+---@field private task function
+---@field private args any[]
+local DeferredTask = extends("DeferredTask", TimedTrigger)
+
+---@param task function
+---@param args any[] Task arguments
+---@param delay number
+function DeferredTask:initialize(task, args, delay)
+	TimedTrigger.initialize(self, delay, false)
+	self.task = task
+	self.args = args
+end
+
+function DeferredTask:execute()
+	self.task(unpack(self.args))
+end
 
 --- @class Game : Base
 --- @field private entities {[string]: Entity}
@@ -169,7 +185,7 @@ end
 --- @param dt number
 function Game:update(dt)
 	--- Execute queued deferred tasks before next update
-	self:executeDeferredTasks()
+	self:executeDeferredTasks(dt)
 
 	for _, behaviour in ipairs(self:getActiveSubscribers("update")) do
 		-- Only update entities that are updateable
@@ -232,20 +248,38 @@ function Game:getActiveSubscribers(event)
 	return subscribers
 end
 
----@param task fun()
----@param ... any
-function Game:defer(task, ...)
-	table.insert(self.deferredTasks, {
-		task = task,
-		args = { ... },
-	})
+---@param task fun(...)
+---@param args any[]? Task arguments - default is empty array
+---@param delay number? Delay in seconds - default is 0 (Next update)
+---@overload fun(task: fun(...), args: any[])
+---@overload fun(task: fun(...), delay: number)
+---@overload fun(task: fun(...))
+function Game:defer(task, args, delay)
+	if args == nil and delay == nil then
+		args = {}
+		delay = 0
+	end
+
+	if type(args) == "number" then
+		delay = args
+		args = {}
+	end
+
+	delay = delay or 0
+	table.insert(self.deferredTasks, DeferredTask:new(task, args, delay))
 end
 
 ---@private
-function Game:executeDeferredTasks()
-	while #self.deferredTasks ~= 0 do
-		local task = table.remove(self.deferredTasks)
-		task.task(unpack(task.args))
+---@param dt number
+function Game:executeDeferredTasks(dt)
+	local tasks = { unpack(self.deferredTasks) }
+	for i, task in ipairs(tasks) do
+		task:update(dt)
+
+		if task:isReady() then
+			task:execute()
+			table.remove(self.deferredTasks, i)
+		end
 	end
 end
 
